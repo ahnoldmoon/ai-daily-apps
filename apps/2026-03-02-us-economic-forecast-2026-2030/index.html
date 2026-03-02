@@ -1,0 +1,308 @@
+<html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미국 경제 전망 시뮬레이터 2026-2030</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0d0d1a;color:#e0e0f0;font-family:'Segoe UI',sans-serif;min-height:100vh;padding:16px}
+  .container{max-width:800px;margin:0 auto}
+  .header{background:linear-gradient(135deg,#1a1a3e,#0f2a4a);border:1px solid #2a2a6e;border-radius:16px;padding:24px;margin-bottom:20px}
+  .header h1{font-size:1.5rem;color:#7ecfff;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+  .header p{font-size:0.88rem;color:#a0b0cc;line-height:1.7}
+  .badge{background:#2a1a5e;color:#b47eff;font-size:0.72rem;padding:3px 10px;border-radius:20px;border:1px solid #6a3aee;white-space:nowrap}
+  .section-title{font-size:1rem;color:#7ecfff;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .section-title::before{content:'';width:4px;height:18px;background:linear-gradient(#b47eff,#7ecfff);border-radius:2px;display:inline-block}
+  .controls{background:#12122a;border:1px solid #2a2a5e;border-radius:12px;padding:20px;margin-bottom:18px}
+  .slider-group{margin-bottom:18px}
+  .slider-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.85rem;color:#c0c8e0}
+  .slider-val{color:#b47eff;font-weight:700;font-size:0.95rem;min-width:60px;text-align:right}
+  input[type=range]{width:100%;-webkit-appearance:none;height:6px;border-radius:3px;background:linear-gradient(90deg,#6a3aee,#2a2a5e);outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#b47eff,#7ecfff);cursor:pointer;box-shadow:0 0 8px #b47eff88}
+  .scenario-btns{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .scen-btn{padding:8px 16px;border-radius:20px;border:1px solid #3a3a7e;background:#1a1a3e;color:#c0c8e0;cursor:pointer;font-size:0.82rem;transition:all 0.2s}
+  .scen-btn:hover,.scen-btn.active{background:linear-gradient(135deg,#2a1a5e,#1a3a5e);border-color:#7ecfff;color:#7ecfff}
+  .chart-area{background:#12122a;border:1px solid #2a2a5e;border-radius:12px;padding:20px;margin-bottom:18px}
+  canvas{width:100%;border-radius:8px}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
+  .metric-card{background:#12122a;border:1px solid #2a2a5e;border-radius:12px;padding:16px;text-align:center;transition:transform 0.2s}
+  .metric-card:hover{transform:translateY(-2px);border-color:#6a3aee}
+  .metric-label{font-size:0.75rem;color:#8090b0;margin-bottom:6px}
+  .metric-val{font-size:1.4rem;font-weight:700}
+  .metric-sub{font-size:0.72rem;color:#8090b0;margin-top:4px}
+  .gdp-val{color:#7ecfff}
+  .inf-val{color:#ff7eb3}
+  .une-val{color:#7effb4}
+  .rat-val{color:#b47eff}
+  .table-wrap{background:#12122a;border:1px solid #2a2a5e;border-radius:12px;padding:20px;margin-bottom:18px;overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:0.82rem}
+  th{background:#1a1a3e;color:#7ecfff;padding:10px 12px;text-align:center;font-weight:600;border-bottom:1px solid #2a2a5e}
+  td{padding:9px 12px;text-align:center;border-bottom:1px solid #1a1a3e;color:#c0c8e0}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#1a1a3e}
+  .trend-up{color:#7effb4}
+  .trend-dn{color:#ff7eb3}
+  .trend-nt{color:#b47eff}
+  .risk-bar{background:#12122a;border:1px solid #2a2a5e;border-radius:12px;padding:20px;margin-bottom:18px}
+  .risk-item{margin-bottom:14px}
+  .risk-label{display:flex;justify-content:space-between;font-size:0.82rem;color:#c0c8e0;margin-bottom:6px}
+  .risk-track{height:8px;background:#1a1a3e;border-radius:4px;overflow:hidden}
+  .risk-fill{height:100%;border-radius:4px;transition:width 0.8s ease}
+  footer{text-align:center;padding:16px;color:#505878;font-size:0.75rem;border-top:1px solid #1a1a3e;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🇺🇸 미국 경제 전망 시뮬레이터 <span class="badge">2026–2030</span></h1>
+    <p>2026년부터 2030년까지의 미국 경제 전망이 주목받고 있습니다. 트럼프 행정부의 관세 정책, 연준의 금리 조정, 인플레이션 지속 등 복합적인 변수 속에서 향후 5년간 GDP 성장률·실업률·물가 흐름에 대한 예측이 투자자와 기업들의 전략 수립에 핵심 자료로 활용됩니다. 시나리오를 선택하거나 슬라이더를 조정해 중장기 경제 흐름을 시뮬레이션하세요.</p>
+  </div>
+
+  <div class="controls">
+    <div class="section-title">시나리오 선택</div>
+    <div class="scenario-btns">
+      <button class="scen-btn active" id="btn-base">📊 기본 시나리오</button>
+      <button class="scen-btn" id="btn-bull">🚀 낙관 시나리오</button>
+      <button class="scen-btn" id="btn-bear">⚠️ 비관 시나리오</button>
+      <button class="scen-btn" id="btn-custom">🎛️ 커스텀</button>
+    </div>
+    <div class="section-title">변수 조정</div>
+    <div class="slider-group">
+      <div class="slider-label"><span>📈 기준금리 (Fed Rate) %</span><span class="slider-val" id="val-rate">4.0%</span></div>
+      <input type="range" id="sl-rate" min="1" max="8" step="0.25" value="4.0">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>🛒 목표 인플레이션 %</span><span class="slider-val" id="val-inf">2.8%</span></div>
+      <input type="range" id="sl-inf" min="1.5" max="6" step="0.1" value="2.8">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>📦 관세 충격 지수 (0–10)</span><span class="slider-val" id="val-tariff">5</span></div>
+      <input type="range" id="sl-tariff" min="0" max="10" step="1" value="5">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>💡 기술 혁신 지수 (0–10)</span><span class="slider-val" id="val-tech">6</span></div>
+      <input type="range" id="sl-tech" min="0" max="10" step="1" value="6">
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric-card"><div class="metric-label">2026 GDP 성장률</div><div class="metric-val gdp-val" id="m-gdp">2.1%</div><div class="metric-sub">전년 대비</div></div>
+    <div class="metric-card"><div class="metric-label">2026 인플레이션</div><div class="metric-val inf-val" id="m-inf">2.8%</div><div class="metric-sub">CPI 기준</div></div>
+    <div class="metric-card"><div class="metric-label">2026 실업률</div><div class="metric-val une-val" id="m-une">4.3%</div><div class="metric-sub">U-3 기준</div></div>
+    <div class="metric-card"><div class="metric-label">2030 누적 성장</div><div class="metric-val rat-val" id="m-cum">11.2%</div><div class="metric-sub">4년 누적</div></div>
+  </div>
+
+  <div class="chart-area">
+    <div class="section-title">GDP 성장률 추이 (2026–2030)</div>
+    <canvas id="chart" height="220"></canvas>
+  </div>
+
+  <div class="table-wrap">
+    <div class="section-title">연도별 경제 지표 전망</div>
+    <table id="forecast-table">
+      <thead><tr><th>연도</th><th>GDP %</th><th>인플레이션 %</th><th>실업률 %</th><th>기준금리 %</th><th>전망</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="risk-bar">
+    <div class="section-title">주요 리스크 지표</div>
+    <div class="risk-item"><div class="risk-label"><span>🔴 경기침체 위험</span><span id="r1-val">42%</span></div><div class="risk-track"><div class="risk-fill" id="r1" style="width:42%;background:linear-gradient(90deg,#ff4466,#ff7eb3)"></div></div></div>
+    <div class="risk-item"><div class="risk-label"><span>🟠 인플레이션 재가속 위험</span><span id="r2-val">38%</span></div><div class="risk-track"><div class="risk-fill" id="r2" style="width:38%;background:linear-gradient(90deg,#ff8c00,#ffcc44)"></div></div></div>
+    <div class="risk-item"><div class="risk-label"><span>🟡 무역전쟁 심화 위험</span><span id="r3-val">55%</span></div><div class="risk-track"><div class="risk-fill" id="r3" style="width:55%;background:linear-gradient(90deg,#b47eff,#7ecfff)"></div></div></div>
+    <div class="risk-item"><div class="risk-label"><span>🟢 성장 모멘텀 유지 가능성</span><span id="r4-val">61%</span></div><div class="risk-track"><div class="risk-fill" id="r4" style="width:61%;background:linear-gradient(90deg,#00c896,#7effb4)"></div></div></div>
+  </div>
+</div>
+<footer>🤖 AI Trend App · 2026-03-02 · US Economic Forecast 2026-2030</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  const slRate=document.getElementById('sl-rate');
+  const slInf=document.getElementById('sl-inf');
+  const slTariff=document.getElementById('sl-tariff');
+  const slTech=document.getElementById('sl-tech');
+  const valRate=document.getElementById('val-rate');
+  const valInf=document.getElementById('val-inf');
+  const valTariff=document.getElementById('val-tariff');
+  const valTech=document.getElementById('val-tech');
+  const mGdp=document.getElementById('m-gdp');
+  const mInf=document.getElementById('m-inf');
+  const mUne=document.getElementById('m-une');
+  const mCum=document.getElementById('m-cum');
+  const tbody=document.getElementById('tbody');
+  const canvas=document.getElementById('chart');
+  const ctx=canvas?canvas.getContext('2d'):null;
+
+  const scenarios={
+    base:{rate:4.0,inf:2.8,tariff:5,tech:6},
+    bull:{rate:3.25,inf:2.2,tariff:2,tech:9},
+    bear:{rate:5.5,inf:4.5,tariff:8,tech:3}
+  };
+
+  function setScenario(s){
+    if(!scenarios[s])return;
+    const d=scenarios[s];
+    if(slRate)slRate.value=d.rate;
+    if(slInf)slInf.value=d.inf;
+    if(slTariff)slTariff.value=d.tariff;
+    if(slTech)slTech.value=d.tech;
+    updateAll();
+  }
+
+  function getVals(){
+    return{
+      rate:parseFloat(slRate?slRate.value:4),
+      inf:parseFloat(slInf?slInf.value:2.8),
+      tariff:parseInt(slTariff?slTariff.value:5),
+      tech:parseInt(slTech?slTech.value:6)
+    };
+  }
+
+  function calcForecast(v){
+    const years=[2026,2027,2028,2029,2030];
+    const baseGdp=2.4 - (v.rate-3)*0.18 - v.tariff*0.09 + v.tech*0.12;
+    const rows=[];
+    let cumGdp=0;
+    years.forEach((yr,i)=>{
+      const decay=i*0.04;
+      const cycle=Math.sin(i*0.8)*0.15;
+      const gdp=+(baseGdp - decay + cycle + (Math.random()-0.5)*0.1).toFixed(2);
+      const inflation=+(v.inf - i*0.08 + v.tariff*0.04 + (Math.random()-0.5)*0.08).toFixed(2);
+      const une=+(4.1 + (v.rate-3.5)*0.12 + v.tariff*0.05 - v.tech*0.04 + i*0.02 + (Math.random()-0.5)*0.1).toFixed(2);
+      const fedRate=+(v.rate - Math.max(0,i-1)*0.15 + (Math.random()-0.5)*0.05).toFixed(2);
+      cumGdp+=gdp;
+      rows.push({yr,gdp,inflation:Math.max(1.2,inflation),une:Math.max(3.2,une),fedRate:Math.max(1.5,fedRate),cumGdp:+cumGdp.toFixed(2)});
+    });
+    return rows;
+  }
+
+  function getOutlook(gdp,inf,une){
+    if(gdp>=2.5&&inf<=2.5&&une<=4.2)return{txt:'✅ 안정 성장',cls:'trend-up'};
+    if(gdp<1.0)return{txt:'🔴 침체 위험',cls:'trend-dn'};
+    if(inf>4.0)return{txt:'🔥 인플레 압박',cls:'trend-dn'};
+    if(gdp>=1.5)return{txt:'🟡 완만 성장',cls:'trend-nt'};
+    return{txt:'⚠️ 둔화',cls:'trend-dn'};
+  }
+
+  function updateSliderLabels(v){
+    if(valRate)valRate.textContent=v.rate+'%';
+    if(valInf)valInf.textContent=v.inf+'%';
+    if(valTariff)valTariff.textContent=v.tariff;
+    if(valTech)valTech.textContent=v.tech;
+  }
+
+  function drawChart(rows){
+    if(!ctx||!canvas)return;
+    const w=canvas.offsetWidth||700;
+    const h=220;
+    canvas.width=w;canvas.height=h;
+    const pad={l:44,r:20,t:20,b:36};
+    const vals=rows.map(r=>r.gdp);
+    const mn=Math.min(...vals)-0.3,mx=Math.max(...vals)+0.3;
+    const xStep=(w-pad.l-pad.r)/(rows.length-1);
+    const yScale=(h-pad.t-pad.b)/(mx-mn);
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle='#2a2a5e';ctx.lineWidth=1;
+    [0,1,2,3].forEach(i=>{
+      const yv=mn+(mx-mn)*i/3;
+      const y=h-pad.b-(yv-mn)*yScale;
+      ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();
+      ctx.fillStyle='#506080';ctx.font='11px sans-serif';ctx.fillText(yv.toFixed(1)+'%',2,y+4);
+    });
+    const grad=ctx.createLinearGradient(0,pad.t,0,h-pad.b);
+    grad.addColorStop(0,'rgba(126,207,255,0.25)');
+    grad.addColorStop(1,'rgba(126,207,255,0)');
+    ctx.beginPath();
+    rows.forEach((r,i)=>{
+      const x=pad.l+i*xStep;
+      const y=h-pad.b-(r.gdp-mn)*yScale;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    const lastX=pad.l+(rows.length-1)*xStep;
+    const lastY=h-pad.b-(rows[rows.length-1].gdp-mn)*yScale;
+    ctx.lineTo(lastX,h-pad.b);ctx.lineTo(pad.l,h-pad.b);ctx.closePath();
+    ctx.fillStyle=grad;ctx.fill();
+    ctx.beginPath();ctx.strokeStyle='#7ecfff';ctx.lineWidth=2.5;ctx.lineJoin='round';
+    rows.forEach((r,i)=>{
+      const x=pad.l+i*xStep;
+      const y=h-pad.b-(r.gdp-mn)*yScale;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+    rows.forEach((r,i)=>{
+      const x=pad.l+i*xStep;
+      const y=h-pad.b-(r.gdp-mn)*yScale;
+      ctx.beginPath();ctx.arc(x,y,5,0,Math.PI*2);
+      ctx.fillStyle=r.gdp>=2?'#7effb4':'#ff7eb3';ctx.fill();
+      ctx.fillStyle='#e0e0f0';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+      ctx.fillText(r.gdp+'%',x,y-12);
+      ctx.fillStyle='#8090b0';ctx.font='11px sans-serif';
+      ctx.fillText(r.yr,x,h-8);
+    });
+  }
+
+  function updateRisks(v,rows){
+    const recession=Math.min(95,Math.max(5,20+v.tariff*4+(v.rate-3)*5-(v.tech*2)));
+    const inflRisk=Math.min(95,Math.max(5,15+v.tariff*3+(v.inf-2)*12));
+    const tradeRisk=Math.min(95,Math.max(5,v.tariff*9+5));
+    const momentum=Math.min(95,Math.max(5,30+v.tech*6-(v.tariff*3)-(v.rate-3)*4));
+    const r1=document.getElementById('r1'),r1v=document.getElementById('r1-val');
+    const r2=document.getElementById('r2'),r2v=document.getElementById('r2-val');
+    const r3=document.getElementById('r3'),r3v=document.getElementById('r3-val');
+    const r4=document.getElementById('r4'),r4v=document.getElementById('r4-val');
+    if(r1){r1.style.width=recession+'%';}if(r1v)r1v.textContent=Math.round(recession)+'%';
+    if(r2){r2.style.width=inflRisk+'%';}if(r2v)r2v.textContent=Math.round(inflRisk)+'%';
+    if(r3){r3.style.width=tradeRisk+'%';}if(r3v)r3v.textContent=Math.round(tradeRisk)+'%';
+    if(r4){r4.style.width=momentum+'%';}if(r4v)r4v.textContent=Math.round(momentum)+'%';
+  }
+
+  function updateAll(){
+    const v=getVals();
+    updateSliderLabels(v);
+    const rows=calcForecast(v);
+    if(mGdp)mGdp.textContent=rows[0].gdp+'%';
+    if(mInf)mInf.textContent=rows[0].inflation+'%';
+    if(mUne)mUne.textContent=rows[0].une+'%';
+    if(mCum)mCum.textContent=rows[rows.length-1].cumGdp+'%';
+    if(tbody){
+      tbody.innerHTML='';
+      rows.forEach(r=>{
+        const o=getOutlook(r.gdp,r.inflation,r.une);
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td>${r.yr}</td><td class="${r.gdp>=2?'trend-up':'trend-dn'}">${r.gdp}</td><td class="${r.inflation<=2.5?'trend-up':'trend-dn'}">${r.inflation}</td><td class="${r.une<=4.2?'trend-up':'trend-nt'}">${r.une}</td><td class="trend-nt">${Math.max(1.5,r.fedRate)}</td><td class="${o.cls}">${o.txt}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    drawChart(rows);
+    updateRisks(v,rows);
+  }
+
+  const btnBase=document.getElementById('btn-base');
+  const btnBull=document.getElementById('btn-bull');
+  const btnBear=document.getElementById('btn-bear');
+  const btnCustom=document.getElementById('btn-custom');
+  const allBtns=[btnBase,btnBull,btnBear,btnCustom];
+
+  function setActive(btn){allBtns.forEach(b=>{if(b)b.classList.remove('active')});if(btn)btn.classList.add('active');}
+  if(btnBase)btnBase.addEventListener('click',()=>{setActive(btnBase);setScenario('base');});
+  if(btnBull)btnBull.addEventListener('click',()=>{setActive(btnBull);setScenario('bull');});
+  if(btnBear)btnBear.addEventListener('click',()=>{setActive(btnBear);setScenario('bear');});
+  if(btnCustom)btnCustom.addEventListener('click',()=>{setActive(btnCustom);});
+
+  [slRate,slInf,slTariff,slTech].forEach(sl=>{if(sl)sl.addEventListener('input',()=>{setActive(btnCustom);updateAll();});});
+
+  window.addEventListener('resize',()=>{
+    const v=getVals();
+    drawChart(calcForecast(v));
+  });
+
+  updateAll();
+});
+</script>
+</body>
+</html>
