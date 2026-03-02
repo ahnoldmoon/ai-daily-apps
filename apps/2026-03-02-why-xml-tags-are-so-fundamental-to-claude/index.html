@@ -2,670 +2,104 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XML Tag Studio — Claude's Core</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XML Tag Quiz</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0d0d1a;
-    --bg2: #13132a;
-    --bg3: #1a1a35;
-    --accent: #7c3aed;
-    --accent2: #4f46e5;
-    --accent3: #06b6d4;
-    --text: #e2e8f0;
-    --text2: #94a3b8;
-    --border: #2d2d5a;
-    --success: #10b981;
-    --error: #ef4444;
-    --warn: #f59e0b;
-  }
-  html { scroll-behavior: smooth; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  header {
-    background: linear-gradient(135deg, var(--bg2), var(--bg3));
-    border-bottom: 1px solid var(--border);
-    padding: 1.5rem 1rem;
-    text-align: center;
-  }
-  header h1 {
-    font-size: clamp(1.3rem, 4vw, 2rem);
-    background: linear-gradient(90deg, var(--accent), var(--accent3));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.3rem;
-  }
-  header p { color: var(--text2); font-size: 0.9rem; }
-  .tabs {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 1.2rem 1rem 0;
-    flex-wrap: wrap;
-  }
-  .tab-btn {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    padding: 0.55rem 1.2rem;
-    border-radius: 2rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.25s;
-    outline: none;
-  }
-  .tab-btn:hover { border-color: var(--accent); color: var(--text); }
-  .tab-btn:focus { box-shadow: 0 0 0 2px var(--accent); }
-  .tab-btn.active {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-color: transparent;
-    color: #fff;
-  }
-  .main { max-width: 900px; width: 100%; margin: 0 auto; padding: 1.5rem 1rem; flex: 1; }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* ── QUIZ ── */
-  .quiz-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.2rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .score-badge {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 0.4rem 1rem;
-    border-radius: 2rem;
-    font-size: 0.9rem;
-    color: var(--accent3);
-    font-weight: 600;
-  }
-  .quiz-card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    transition: border-color 0.3s;
-  }
-  .quiz-card.correct { border-color: var(--success); }
-  .quiz-card.wrong { border-color: var(--error); }
-  .quiz-q {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-  }
-  .quiz-q code {
-    background: var(--bg3);
-    padding: 0.1rem 0.4rem;
-    border-radius: 0.3rem;
-    font-family: monospace;
-    color: var(--accent3);
-    font-size: 0.95em;
-  }
-  .options { display: grid; gap: 0.6rem; }
-  .opt-btn {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 0.7rem 1rem;
-    border-radius: 0.6rem;
-    cursor: pointer;
-    text-align: left;
-    font-size: 0.9rem;
-    transition: all 0.2s;
-    outline: none;
-    width: 100%;
-  }
-  .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: #1e1e3f; }
-  .opt-btn:focus { box-shadow: 0 0 0 2px var(--accent2); }
-  .opt-btn.correct-ans { background: #052e16; border-color: var(--success); color: #4ade80; }
-  .opt-btn.wrong-ans { background: #2a0a0a; border-color: var(--error); color: #f87171; }
-  .opt-btn:disabled { cursor: default; }
-  .feedback {
-    margin-top: 0.8rem;
-    font-size: 0.85rem;
-    padding: 0.6rem 0.9rem;
-    border-radius: 0.5rem;
-    display: none;
-    line-height: 1.5;
-  }
-  .feedback.show { display: block; }
-  .feedback.ok { background: #052e16; color: #4ade80; border: 1px solid #166534; }
-  .feedback.bad { background: #2a0a0a; color: #f87171; border: 1px solid #7f1d1d; }
-  .quiz-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1.5rem;
-    gap: 1rem;
-  }
-  .progress-bar { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 3px; transition: width 0.4s; }
-  .btn-primary {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    color: #fff;
-    padding: 0.65rem 1.5rem;
-    border-radius: 0.6rem;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: opacity 0.2s, transform 0.1s;
-    outline: none;
-    white-space: nowrap;
-  }
-  .btn-primary:hover { opacity: 0.88; }
-  .btn-primary:focus { box-shadow: 0 0 0 2px var(--accent3); }
-  .btn-primary:active { transform: scale(0.97); }
-  .result-box {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    padding: 2rem;
-    text-align: center;
-    display: none;
-  }
-  .result-box.show { display: block; }
-  .result-box h2 { font-size: 1.6rem; margin-bottom: 0.5rem; }
-  .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(90deg, var(--accent), var(--accent3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .result-box p { color: var(--text2); margin-top: 0.5rem; margin-bottom: 1.5rem; }
-
-  /* ── TRANSFORM ── */
-  .transform-wrap { display: grid; gap: 1.2rem; }
-  .transform-controls {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-  .mode-btn {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.2s;
-    outline: none;
-  }
-  .mode-btn:hover { border-color: var(--accent2); color: var(--text); }
-  .mode-btn:focus { box-shadow: 0 0 0 2px var(--accent2); }
-  .mode-btn.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
-  textarea {
-    width: 100%;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 0.75rem;
-    color: var(--text);
-    font-family: monospace;
-    font-size: 0.9rem;
-    padding: 1rem;
-    resize: vertical;
-    min-height: 130px;
-    outline: none;
-    transition: border-color 0.2s;
-    line-height: 1.6;
-  }
-  textarea:focus { border-color: var(--accent); }
-  textarea::placeholder { color: var(--text2); }
-  .output-box {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    border-radius: 0.75rem;
-    padding: 1rem;
-    font-family: monospace;
-    font-size: 0.85rem;
-    min-height: 130px;
-    white-space: pre-wrap;
-    word-break: break-all;
-    line-height: 1.7;
-    position: relative;
-    overflow-x: auto;
-  }
-  .output-label {
-    font-size: 0.78rem;
-    color: var(--text2);
-    margin-bottom: 0.4rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .copy-btn {
-    position: absolute;
-    top: 0.6rem;
-    right: 0.6rem;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    padding: 0.3rem 0.7rem;
-    border-radius: 0.4rem;
-    cursor: pointer;
-    font-size: 0.78rem;
-    transition: all 0.2s;
-    outline: none;
-  }
-  .copy-btn:hover { border-color: var(--accent3); color: var(--accent3); }
-  .copy-btn:focus { box-shadow: 0 0 0 2px var(--accent3); }
-  .xml-highlight { color: var(--accent3); }
-  .xml-attr { color: var(--warn); }
-  .xml-val { color: var(--success); }
-  .xml-content { color: var(--text); }
-  .tag-stats {
-    display: flex;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
-  }
-  .stat-pill {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 0.3rem 0.8rem;
-    border-radius: 2rem;
-    font-size: 0.8rem;
-    color: var(--text2);
-  }
-  .stat-pill span { color: var(--accent3); font-weight: 700; }
-
-  /* ── SIMULATOR ── */
-  .sim-wrap { display: grid; gap: 1.2rem; }
-  .sim-display {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    font-family: monospace;
-    font-size: 0.88rem;
-    line-height: 1.8;
-    min-height: 200px;
-    overflow-x: auto;
-    white-space: pre;
-  }
-  .sim-controls { display: grid; gap: 1rem; }
-  .control-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-  .control-label {
-    font-size: 0.85rem;
-    color: var(--text2);
-    min-width: 130px;
-  }
-  input[type="range"] {
-    -webkit-appearance: none;
-    flex: 1;
-    min-width: 100px;
-    height: 6px;
-    background: var(--bg3);
-    border-radius: 3px;
-    outline: none;
-    cursor: pointer;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent3));
-    cursor: pointer;
-    box-shadow: 0 0 6px rgba(124,58,237,0.5);
-  }
-  input[type="range"]:focus { box-shadow: 0 0 0 2px var(--accent); border-radius: 3px; }
-  .range-val {
-    min-width: 2.5rem;
-    text-align: right;
-    font-size: 0.9rem;
-    color: var(--accent3);
-    font-weight: 700;
-  }
-  .sim-toggle-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-  .toggle-chip {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    padding: 0.35rem 0.8rem;
-    border-radius: 2rem;
-    cursor: pointer;
-    font-size: 0.82rem;
-    transition: all 0.2s;
-    outline: none;
-  }
-  .toggle-chip:hover { border-color: var(--accent2); }
-  .toggle-chip:focus { box-shadow: 0 0 0 2px var(--accent2); }
-  .toggle-chip.on { background: linear-gradient(135deg, var(--accent2), var(--accent)); border-color: transparent; color: #fff; }
-  .sim-info { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 0.3rem; }
-  .info-card {
-    flex: 1;
-    min-width: 100px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: 0.6rem;
-    padding: 0.7rem;
-    text-align: center;
-  }
-  .info-card .inum { font-size: 1.3rem; font-weight: 800; color: var(--accent3); }
-  .info-card .ilabel { font-size: 0.72rem; color: var(--text2); margin-top: 0.2rem; }
-  .section-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 0.8rem;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--border);
-  }
-
-  footer {
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    text-align: center;
-    padding: 1rem;
-    font-size: 0.8rem;
-    color: var(--text2);
-  }
-
-  @media (max-width: 600px) {
-    .control-label { min-width: 100px; }
-    .quiz-nav { flex-direction: column; align-items: stretch; }
-    .btn-primary { text-align: center; }
-  }
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d0d1a;color:#e0e0ff;font-family:sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+h1{color:#a78bfa;font-size:1.4rem;margin-bottom:6px;text-align:center}
+p.sub{color:#6b7280;font-size:.85rem;margin-bottom:20px;text-align:center}
+#app{width:100%;max-width:700px;flex:1}
+.card{background:#13132a;border:1px solid #2d2d5e;border-radius:12px;padding:22px;margin-bottom:16px}
+.q-num{color:#7c3aed;font-size:.8rem;font-weight:700;margin-bottom:8px}
+.q-text{font-size:1rem;margin-bottom:14px;line-height:1.5}
+.opts button{display:block;width:100%;text-align:left;background:#1e1e3f;color:#c4b5fd;border:1px solid #3730a3;border-radius:8px;padding:10px 14px;margin-bottom:8px;cursor:pointer;font-size:.9rem;transition:background .2s}
+.opts button:hover{background:#2d2b5e}
+.opts button.correct{background:#14532d;border-color:#22c55e;color:#86efac}
+.opts button.wrong{background:#450a0a;border-color:#ef4444;color:#fca5a5}
+.opts button:disabled{cursor:default}
+.feedback{font-size:.85rem;margin-top:8px;min-height:18px}
+#score-box{display:none;text-align:center;padding:30px;background:#13132a;border:1px solid #7c3aed;border-radius:12px}
+#score-box h2{color:#a78bfa;font-size:1.6rem;margin-bottom:10px}
+#score-box p{color:#c4b5fd;margin-bottom:16px}
+#restart{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:10px 24px;cursor:pointer;font-size:1rem}
+#restart:hover{background:#6d28d9}
+footer{margin-top:24px;color:#374151;font-size:.75rem;text-align:center}
 </style>
 </head>
 <body>
-<header>
-  <h1>🏷️ XML Tag Studio</h1>
-  <p>Explore why XML tags are fundamental to Claude — Quiz · Transform · Simulator</p>
-</header>
-
-<div class="tabs">
-  <button class="tab-btn active" data-tab="quiz">📝 Quiz</button>
-  <button class="tab-btn" data-tab="transform">🔄 XML Transform</button>
-  <button class="tab-btn" data-tab="simulator">⚙️ Prompt Simulator</button>
+<div id="app">
+<h1>🏷️ XML Tags & Claude Quiz</h1>
+<p class="sub">Claude가 XML 태그를 사용하는 이유를 알아보세요!</p>
+<div id="quiz-area"></div>
+<div id="score-box">
+  <h2 id="score-text"></h2>
+  <p id="score-msg"></p>
+  <button id="restart">다시 풀기</button>
 </div>
-
-<div class="main">
-
-  <!-- QUIZ TAB -->
-  <div class="tab-panel active" id="tab-quiz">
-    <div class="quiz-header">
-      <div class="section-title" style="margin:0;flex:1;">XML & Claude — Knowledge Quiz</div>
-      <div class="score-badge">Score: <span id="score-display">0</span> / <span id="total-display">0</span></div>
-    </div>
-    <div id="quiz-area"></div>
-    <div class="result-box" id="result-box">
-      <h2>🎉 Quiz Complete!</h2>
-      <div class="result-score" id="final-score"></div>
-      <p id="result-msg"></p>
-      <button class="btn-primary" id="restart-btn">↺ Restart Quiz</button>
-    </div>
-    <div class="quiz-nav" id="quiz-nav">
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-      <button class="btn-primary" id="next-btn" style="display:none;">Next →</button>
-    </div>
-  </div>
-
-  <!-- TRANSFORM TAB -->
-  <div class="tab-panel" id="tab-transform">
-    <div class="section-title">XML Tag Transformer</div>
-    <div class="transform-wrap">
-      <div>
-        <div class="output-label">Mode</div>
-        <div class="transform-controls">
-          <button class="mode-btn active" data-mode="wrap">Wrap in XML</button>
-          <button class="mode-btn" data-mode="analyze">Analyze Tags</button>
-          <button class="mode-btn" data-mode="strip">Strip Tags</button>
-          <button class="mode-btn" data-mode="prompt">Claude Prompt</button>
-        </div>
-      </div>
-      <div>
-        <div class="output-label">Tag Name (for wrap/prompt mode)</div>
-        <input type="text" id="tag-name-input" placeholder="e.g. instruction, context, data" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:0.6rem;color:var(--text);padding:0.6rem 0.9rem;font-size:0.9rem;outline:none;transition:border-color 0.2s;" />
-      </div>
-      <div>
-        <div class="output-label">Input Text</div>
-        <textarea id="transform-input" placeholder="Enter your text here...&#10;&#10;Example: Summarize the following article and highlight key points."></textarea>
-      </div>
-      <div>
-        <div style="position:relative;">
-          <div class="output-label">Output</div>
-          <button class="copy-btn" id="copy-output-btn">Copy</button>
-        </div>
-        <div class="output-box" id="transform-output"><span style="color:var(--text2)">Output will appear here...</span></div>
-        <div class="tag-stats" id="tag-stats"></div>
-      </div>
-      <button class="btn-primary" id="transform-btn" style="align-self:flex-start;">✦ Transform</button>
-    </div>
-  </div>
-
-  <!-- SIMULATOR TAB -->
-  <div class="tab-panel" id="tab-simulator">
-    <div class="section-title">Claude Prompt Structure Simulator</div>
-    <div class="sim-wrap">
-      <div>
-        <div class="output-label" style="margin-bottom:0.6rem;">Live Preview — Structured Prompt</div>
-        <div class="sim-display" id="sim-display"></div>
-      </div>
-      <div class="sim-info" id="sim-info"></div>
-      <div class="sim-controls">
-        <div class="control-row">
-          <div class="control-label">Nesting Depth</div>
-          <input type="range" id="depth-slider" min="1" max="4" value="2" />
-          <div class="range-val" id="depth-val">2</div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">Tags per Level</div>
-          <input type="range" id="tags-slider" min="1" max="5" value="2" />
-          <div class="range-val" id="tags-val">2</div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">Indent Size</div>
-          <input type="range" id="indent-slider" min="0" max="6" value="2" />
-          <div class="range-val" id="indent-val">2</div>
-        </div>
-        <div class="control-row">
-          <div class="control-label">Include Attrs</div>
-          <div class="sim-toggle-group">
-            <button class="toggle-chip on" id="toggle-attrs">Attributes ON</button>
-            <button class="toggle-chip on" id="toggle-content">Content ON</button>
-            <button class="toggle-chip" id="toggle-comments">Comments OFF</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </div>
-
 <footer>🤖 AI Trend App · 2026-03-02 · Why XML tags are so fundamental to Claude</footer>
-
-<script defer>
-document.addEventListener('DOMContentLoaded', function() {
-
-  // ── TAB SWITCHING ──
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  const tabPanels = document.querySelectorAll('.tab-panel');
-  tabBtns.forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      const target = btn.getAttribute('data-tab');
-      tabBtns.forEach(function(b) { b.classList.remove('active'); });
-      tabPanels.forEach(function(p) { p.classList.remove('active'); });
-      btn.classList.add('active');
-      const panel = document.getElementById('tab-' + target);
-      if (!panel) return;
-      panel.classList.add('active');
-    });
-  });
-
-  // ────────────────────────────────────────────────────────
-  //  QUIZ
-  // ────────────────────────────────────────────────────────
-  var quizData = [
-    {
-      q: 'What is the PRIMARY reason Claude uses XML tags like <code>&lt;instruction&gt;</code> in prompts?',
-      options: [
-        'To make prompts look more professional',
-        'To clearly separate different parts of the prompt for unambiguous parsing',
-        'Because XML is faster to process than plain text',
-        'To encrypt sensitive content'
-      ],
-      correct: 1,
-      explanation: 'XML tags give Claude unambiguous delimiters between sections (e.g., instructions vs. data), reducing confusion and improving accuracy.'
-    },
-    {
-      q: 'Which XML structure best separates a SYSTEM instruction from USER data in a Claude prompt?',
-      options: [
-        '<code>&lt;prompt&gt;Summarize {text}&lt;/prompt&gt;</code>',
-        '<code>&lt;instruction&gt;Summarize&lt;/instruction&gt;&lt;data&gt;{text}&lt;/data&gt;</code>',
-        '<code>## Instruction\\nSummarize\\n## Data\\n{text}</code>',
-        '<code>INST: Summarize | DATA: {text}</code>'
-      ],
-      correct: 1,
-      explanation: 'Using distinct XML tags like <instruction> and <data> makes boundaries machine-readable and unambiguous, unlike markdown or custom delimiters.'
-    },
-    {
-      q: 'What happens when user-supplied content contains special characters without XML wrapping?',
-      options: [
-        'Nothing — Claude ignores special characters automatically',
-        'Prompt injection attacks become more difficult',
-        'Claude may misinterpret injected instructions within the content as real commands',
-        'The response becomes slower'
-      ],
-      correct: 2,
-      explanation: 'Without clear XML boundaries, malicious or accidental text in user input can bleed into instruction space, causing prompt injection vulnerabilities.'
-    },
-    {
-      q: 'Which of the following is a valid benefit of XML tags in multi-turn Claude conversations?',
-      options: [
-        'They compress token usage significantly',
-        'They allow Claude to maintain structured context across turns',
-        'They enable Claude to browse the internet',
-        'They replace system prompts entirely'
-      ],
-      correct: 1,
-      explanation: 'XML tags like <history>, <context>, <message> let Claude reliably identify and separate conversation components across multiple turns.'
-    },
-    {
-      q: 'When building a RAG pipeline with Claude, which approach is BEST for injecting retrieved documents?',
-      options: [
-        'Paste documents directly before the question with no formatting',
-        'Use markdown headers like ## Document 1',
-        'Wrap each document in <code>&lt;document id="1"&gt;...&lt;/document&gt;</code> tags',
-        'Convert documents to JSON strings'
-      ],
-      correct: 2,
-      explanation: 'XML tags with attributes like id="1" give Claude precise, machine-readable boundaries for each document, enabling accurate citation and retrieval.'
-    },
-    {
-      q: 'What does the self-closing XML tag <code>&lt;thinking/&gt;</code> represent in Claude\'s extended thinking feature?',
-      options: [
-        'A way to hide the model\'s reasoning from the final answer',
-        'A placeholder for the model\'s internal chain-of-thought reasoning block',
-        'An error indicator',
-        'A comment that Claude ignores'
-      ],
-      correct: 1,
-      explanation: 'Claude uses <thinking> tags to structure internal reasoning. This separates scratchpad thoughts from the final user-facing response.'
-    },
-    {
-      q: 'Why are XML tags preferred over markdown headings (##) for structuring Claude prompts?',
-      options: [
-        'XML renders better in browsers',
-        'Markdown headings use more tokens',
-        'XML tags are explicit, nestable, and unambiguous — markdown can vary by parser',
-        'Claude cannot read markdown'
-      ],
-      correct: 2,
-      explanation: 'XML provides explicit open/close pairs that are unambiguous and nestable, while markdown heading behavior can vary and lacks closing delimiters.'
-    },
-    {
-      q: 'In a Claude prompt with nested XML like <code>&lt;outer&gt;&lt;inner&gt;text&lt;/inner&gt;&lt;/outer&gt;</code>, what is the key advantage?',
-      options: [
-        'Faster inference speed',
-        'Hierarchical structure that represents relationships between prompt components',
-        'Smaller file size',
-        'Automatic grammar checking'
-      ],
-      correct: 1,
-      explanation: 'Nesting XML tags creates a semantic hierarchy (e.g., a task containing subtasks containing examples) that Claude can leverage for better structured understanding.'
-    }
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  var qs=[
+    {q:"Claude가 XML 태그를 사용하는 주된 이유는?",opts:["디자인을 예쁘게 하기 위해","콘텐츠 구조를 명확히 구분하기 위해","파일 용량을 줄이기 위해","HTML과 호환되기 때문에"],a:1,exp:"XML 태그는 콘텐츠의 역할과 경계를 명확히 구분해 AI가 정확히 파싱할 수 있게 합니다."},
+    {q:"<context> 태그의 역할로 가장 적절한 것은?",opts:["출력 형식 지정","배경 정보 제공","오류 처리","스타일 정의"],a:1,exp:"<context> 태그는 Claude에게 배경 정보나 상황 맥락을 전달하는 데 사용됩니다."},
+    {q:"XML 태그가 프롬프트 엔지니어링에서 중요한 이유는?",opts:["처리 속도가 빠름","모호성 제거와 명확한 경계 설정","토큰 수 절감","멀티모달 지원"],a:1,exp:"명확한 태그 경계는 Claude가 지시사항과 데이터를 혼동하지 않도록 도와줍니다."},
+    {q:"<example> 태그를 사용하면 얻는 이점은?",opts:["응답 속도 향상","Claude가 원하는 출력 패턴을 학습","메모리 절약","보안 강화"],a:1,exp:"<example> 태그 안의 예시를 통해 Claude는 기대하는 응답 형식을 정확히 파악합니다."},
+    {q:"XML 태그 기반 프롬프트의 특징이 아닌 것은?",opts:["구조화된 입력 제공","역할 분리 명확화","자동 번역 지원","재사용성 높은 템플릿"],a:2,exp:"XML 태그는 자동 번역 기능과는 무관합니다. 구조화·역할분리·재사용성이 핵심 장점입니다."}
   ];
-
-  var currentQ = 0;
-  var score = 0;
-  var answered = false;
-
-  var quizArea = document.getElementById('quiz-area');
-  var resultBox = document.getElementById('result-box');
-  var nextBtn = document.getElementById('next-btn');
-  var restartBtn = document.getElementById('restart-btn');
-  var scoreDisplay = document.getElementById('score-display');
-  var totalDisplay = document.getElementById('total-display');
-  var progressFill = document.getElementById('progress-fill');
-  var finalScore = document.getElementById('final-score');
-  var resultMsg = document.getElementById('result-msg');
-  var quizNav = document.getElementById('quiz-nav');
-
-  function renderQuestion() {
-    if (!quizArea) return;
-    answered = false;
-    var q = quizData[currentQ];
-    var pct = (currentQ / quizData.length) * 100;
-    if (progressFill) progressFill.style.width = pct + '%';
-    if (totalDisplay) totalDisplay.textContent = quizData.length;
-    if (scoreDisplay) scoreDisplay.textContent = score;
-    if (nextBtn) nextBtn.style.display = 'none';
-
-    var html = '<div class="quiz-card" id="qcard">';
-    html += '<div class="quiz-q">Q' + (currentQ + 1) + '. ' + q.q + '</div>';
-    html += '<div class="options">';
-    q.options.forEach(function(opt, i) {
-      html += '<button class="opt-btn" data-idx="' + i + '">' + opt + '</button>';
-    });
-    html += '</div>';
-    html += '<div class="feedback" id="feedback"></div>';
-    html += '</div>';
-    quizArea.innerHTML = html;
-
-    var optBtns = quizArea.querySelectorAll('.opt-btn');
-    optBtns.forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        if (answered) return;
-        answered = true;
-        var chosen = parseInt(btn.getAttribute('data-idx'));
-        var card = document.getElementById('qcard');
-        var fb = document.getElementById('feedback');
-        optBtns.forEach(function(b) { b.disabled = true; });
-        if (chosen === q.correct) {
-          score++;
-          btn.classList.add('correct-ans');
-          if (card) card.classList.add('correct');
-          if (fb) { fb.textContent = '✅ Correct! ' + q.explanation; fb.className = 'feedback show ok'; }
-        } else {
-          btn.classList.add('wrong-ans');
-          if (card) card.classList.add('wrong');
-          var corrBtn = quizArea.querySelector('[data-idx="' + q.correct + '"]');
-          if (corrBtn) corrBtn.classList.add('correct-ans');
-          if (fb) { fb.textContent = '❌ Incorrect. ' + q.explanation; fb.className = 'feedback show bad'; }
-        }
-        if (scoreDisplay) scoreDisplay.textContent = score;
-        if (nextBtn) nextBtn.style.display = 'inline-block';
+  var score=0,answered=0,total=qs.length;
+  var area=document.getElementById('quiz-area');
+  var scoreBox=document.getElementById('score-box');
+  var scoreText=document.getElementById('score-text');
+  var scoreMsg=document.getElementById('score-msg');
+  var restart=document.getElementById('restart');
+  function render(){
+    if(!area)return;
+    area.innerHTML='';
+    score=0;answered=0;
+    if(scoreBox)scoreBox.style.display='none';
+    qs.forEach(function(q,i){
+      var card=document.createElement('div');
+      card.className='card';
+      card.innerHTML='<div class="q-num">Q'+(i+1)+' / '+total+'</div><div class="q-text">'+q.q+'</div><div class="opts" id="opts'+i+'"></div><div class="feedback" id="fb'+i+'"></div>';
+      area.appendChild(card);
+      var opts=document.getElementById('opts'+i);
+      q.opts.forEach(function(opt,j){
+        var btn=document.createElement('button');
+        btn.textContent=opt;
+        btn.addEventListener('click',function(){
+          var btns=opts.querySelectorAll('button');
+          btns.forEach(function(b){b.disabled=true;});
+          var fb=document.getElementById('fb'+i);
+          if(j===q.a){
+            btn.className='correct';
+            score++;
+            if(fb)fb.innerHTML='<span style="color:#86efac">✔ 정답! </span>'+q.exp;
+          } else {
+            btn.className='wrong';
+            if(btns[q.a])btns[q.a].className='correct';
+            if(fb)fb.innerHTML='<span style="color:#fca5a5">✘ 오답. </span>'+q.exp;
+          }
+          answered++;
+          if(answered===total){setTimeout(showScore,600);}
+        });
+        if(opts)opts.appendChild(btn);
       });
+    });
+  }
+  function showScore(){
+    if(!scoreBox||!scoreText||!scoreMsg)return;
+    var pct=Math.round(score/total*100);
+    scoreText.textContent=score+' / '+total+' 점 ('+pct+'%)';
+    var msg=pct===100?'🏆 완벽합니다! XML 태그 마스터!':pct>=60?'👍 잘 하셨어요! 조금만 더 공부해봐요.':'📚 XML 태그를 더 깊이 공부해보세요!';
+    scoreMsg.textContent=msg;
+    scoreBox.style.display='block';
+    scoreBox.scrollIntoView({behavior:'smooth'});
+  }
+  if(restart)restart.addEventListener('click',function(){render();window.scrollTo(0,0);});
+  render();
+});
+</script>
+</body>
+</html>
