@@ -5,34 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>XML Tag Playground for Claude</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0d0f1a;
-    --surface: #161929;
-    --surface2: #1e2235;
-    --surface3: #252840;
-    --accent: #7c6af7;
-    --accent2: #a78bfa;
-    --accent3: #38bdf8;
-    --green: #34d399;
-    --orange: #fb923c;
-    --pink: #f472b6;
-    --text: #e2e8f0;
-    --text2: #94a3b8;
-    --text3: #64748b;
-    --border: #2a2f4a;
-    --radius: 12px;
-    --shadow: 0 4px 24px rgba(0,0,0,0.4);
-  }
-
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: #0d0d1a;
+    color: #e0e0f0;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+  }
+
+  .bg-orbs {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: float 8s ease-in-out infinite;
+  }
+  .orb1 { width: 400px; height: 400px; background: #7c3aed; top: -100px; left: -100px; animation-delay: 0s; }
+  .orb2 { width: 350px; height: 350px; background: #2563eb; bottom: 100px; right: -80px; animation-delay: 3s; }
+  .orb3 { width: 250px; height: 250px; background: #0891b2; top: 50%; left: 50%; animation-delay: 6s; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
   }
 
   .container {
@@ -40,797 +44,808 @@
     margin: 0 auto;
     padding: 0 20px;
     width: 100%;
+    position: relative;
+    z-index: 1;
   }
 
-  /* HEADER */
   header {
-    background: linear-gradient(135deg, #0d0f1a 0%, #161929 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(10px);
-  }
-
-  .header-inner {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .logo {
-    width: 44px;
-    height: 44px;
-    background: linear-gradient(135deg, var(--accent), var(--accent3));
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-  }
-
-  .header-text h1 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    background: linear-gradient(90deg, var(--accent2), var(--accent3));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .header-text p {
-    font-size: 0.75rem;
-    color: var(--text3);
-    margin-top: 2px;
+    padding: 30px 20px 20px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
   }
 
   .badge {
-    margin-left: auto;
-    background: linear-gradient(135deg, rgba(124,106,247,0.2), rgba(56,189,248,0.2));
-    border: 1px solid rgba(124,106,247,0.4);
-    color: var(--accent2);
-    padding: 4px 12px;
+    display: inline-block;
+    background: linear-gradient(135deg, #7c3aed33, #2563eb33);
+    border: 1px solid #7c3aed66;
     border-radius: 20px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    white-space: nowrap;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: #a78bfa;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
   }
 
-  /* HERO */
-  .hero {
-    padding: 48px 0 32px;
-    text-align: center;
-  }
-
-  .hero h2 {
-    font-size: clamp(1.6rem, 4vw, 2.6rem);
+  h1 {
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
     font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 12px;
-  }
-
-  .hero h2 span {
-    background: linear-gradient(90deg, var(--accent2), var(--accent3), var(--pink));
+    background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    margin-bottom: 10px;
+    line-height: 1.2;
   }
 
-  .hero p {
-    color: var(--text2);
+  .subtitle {
+    color: #8892b0;
     font-size: 1rem;
-    max-width: 580px;
-    margin: 0 auto 24px;
-    line-height: 1.7;
+    max-width: 600px;
+    margin: 0 auto 30px;
+    line-height: 1.6;
   }
 
-  /* TABS */
+  /* Tabs */
   .tabs {
     display: flex;
-    gap: 8px;
     justify-content: center;
+    gap: 8px;
+    margin-bottom: 30px;
     flex-wrap: wrap;
-    margin-bottom: 32px;
+    padding: 0 20px;
+    position: relative;
+    z-index: 1;
   }
 
   .tab-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    padding: 8px 18px;
-    border-radius: 24px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    color: #8892b0;
+    padding: 10px 20px;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 500;
-    transition: all 0.2s;
+    font-size: 14px;
+    transition: all 0.3s;
+    white-space: nowrap;
   }
 
-  .tab-btn:hover { border-color: var(--accent); color: var(--accent2); }
+  .tab-btn:hover {
+    border-color: #7c3aed66;
+    color: #a78bfa;
+  }
+
   .tab-btn.active {
-    background: linear-gradient(135deg, var(--accent), var(--accent3));
-    border-color: transparent;
-    color: #fff;
+    background: linear-gradient(135deg, #7c3aed22, #2563eb22);
+    border-color: #7c3aed;
+    color: #a78bfa;
+    box-shadow: 0 0 20px #7c3aed22;
   }
 
-  /* PANELS */
-  .panel { display: none; }
-  .panel.active { display: block; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
 
-  /* CARD */
+  /* Cards */
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    background: #111127;
+    border: 1px solid #1e1e3f;
+    border-radius: 16px;
     padding: 24px;
     margin-bottom: 20px;
+    transition: border-color 0.3s;
   }
 
+  .card:hover { border-color: #7c3aed44; }
+
   .card-title {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: var(--accent2);
+    color: #c4b5fd;
     margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
 
-  /* PLAYGROUND */
-  .playground-grid {
+  .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
 
-  @media(max-width: 700px) { .playground-grid { grid-template-columns: 1fr; } }
-
-  .editor-area {
-    position: relative;
+  @media (max-width: 768px) {
+    .grid-2 { grid-template-columns: 1fr; }
   }
 
-  .editor-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 8px;
-  }
-
-  textarea {
+  /* Prompt Builder */
+  .prompt-area {
     width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
+    background: #0a0a18;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    color: #e0e0f0;
     padding: 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.7;
     resize: vertical;
     min-height: 200px;
+    transition: border-color 0.3s;
+  }
+
+  .prompt-area:focus {
     outline: none;
-    transition: border-color 0.2s;
-    line-height: 1.6;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px #7c3aed22;
   }
 
-  textarea:focus { border-color: var(--accent); }
-
-  .output-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    min-height: 200px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.85rem;
-    line-height: 1.6;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-
-  /* XML Highlighting */
-  .xml-tag { color: #7c6af7; font-weight: 600; }
-  .xml-attr { color: #38bdf8; }
-  .xml-value { color: #34d399; }
-  .xml-content { color: #e2e8f0; }
-  .xml-comment { color: #64748b; font-style: italic; }
-
-  .btn {
-    background: linear-gradient(135deg, var(--accent), var(--accent3));
-    border: none;
-    color: #fff;
-    padding: 10px 22px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.88rem;
-    font-weight: 600;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,106,247,0.4); }
-  .btn:active { transform: translateY(0); }
-
-  .btn-sm {
-    padding: 7px 14px;
-    font-size: 0.78rem;
-  }
-
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--text2);
-  }
-  .btn-outline:hover { border-color: var(--accent); color: var(--accent2); box-shadow: none; }
-
-  .btn-row {
+  .tag-palette {
     display: flex;
-    gap: 8px;
-    margin-top: 12px;
     flex-wrap: wrap;
-  }
-
-  /* TAG BUILDER */
-  .tag-builder {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
+    gap: 8px;
     margin-bottom: 16px;
   }
 
   .tag-chip {
-    background: var(--surface2);
-    border: 1px solid var(--border);
+    background: linear-gradient(135deg, #1e1e3f, #2a1a4a);
+    border: 1px solid #7c3aed44;
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-family: 'Courier New', monospace;
+    color: #a78bfa;
     cursor: pointer;
     transition: all 0.2s;
-    display: flex;
+    user-select: none;
+  }
+
+  .tag-chip:hover {
+    background: linear-gradient(135deg, #7c3aed33, #2563eb33);
+    border-color: #7c3aed;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px #7c3aed33;
+  }
+
+  .tag-chip:active { transform: translateY(0); }
+
+  /* Buttons */
+  .btn {
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
   }
 
-  .tag-chip:hover { border-color: var(--accent); background: var(--surface3); }
-  .tag-chip.selected { border-color: var(--accent); background: rgba(124,106,247,0.1); }
-
-  .tag-chip .chip-tag {
-    color: var(--accent);
-    font-family: monospace;
-    font-size: 0.8rem;
-    font-weight: 700;
+  .btn-primary {
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: white;
+    box-shadow: 0 4px 15px #7c3aed44;
   }
 
-  .tag-chip .chip-desc {
-    font-size: 0.75rem;
-    color: var(--text3);
-    line-height: 1.3;
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px #7c3aed55;
   }
 
-  /* VISUALIZER */
-  .xml-tree {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+  .btn-secondary {
+    background: #1e1e3f;
+    border: 1px solid #2a2a4a;
+    color: #8892b0;
+  }
+
+  .btn-secondary:hover {
+    border-color: #7c3aed55;
+    color: #a78bfa;
+  }
+
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  /* XML Output Display */
+  .xml-display {
+    background: #0a0a18;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
     padding: 16px;
-    font-family: monospace;
-    font-size: 0.83rem;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    min-height: 120px;
+    white-space: pre-wrap;
+    word-break: break-all;
     overflow-x: auto;
   }
 
-  .tree-node {
-    padding: 3px 0;
-    transition: background 0.15s;
+  .xml-tag { color: #f472b6; }
+  .xml-attr { color: #34d399; }
+  .xml-value { color: #fbbf24; }
+  .xml-content { color: #e0e0f0; }
+  .xml-comment { color: #6b7280; font-style: italic; }
+
+  /* Score / Analysis */
+  .score-bar-container {
+    margin: 12px 0;
   }
 
-  .tree-node:hover > .tree-line { background: rgba(124,106,247,0.08); border-radius: 4px; }
-
-  .tree-line {
+  .score-label {
     display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 4px;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-
-  .tree-indent { color: var(--border); }
-  .tree-children { padding-left: 20px; border-left: 1px dashed var(--border); margin-left: 8px; }
-
-  /* BEFORE/AFTER DEMO */
-  .compare-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  @media(max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
-
-  .compare-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .compare-header {
-    padding: 10px 16px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .compare-header.bad { background: rgba(239,68,68,0.15); border-bottom: 1px solid rgba(239,68,68,0.3); color: #f87171; }
-  .compare-header.good { background: rgba(52,211,153,0.15); border-bottom: 1px solid rgba(52,211,153,0.3); color: var(--green); }
-
-  .compare-body {
-    padding: 14px 16px;
-    font-family: monospace;
-    font-size: 0.8rem;
-    line-height: 1.8;
-    white-space: pre-wrap;
-    color: var(--text2);
-  }
-
-  /* METRICS */
-  .metrics-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .metric-card {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-    text-align: center;
-    transition: all 0.2s;
-  }
-
-  .metric-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-
-  .metric-value {
-    font-size: 2rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent2), var(--accent3));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #8892b0;
     margin-bottom: 6px;
   }
 
-  .metric-label {
-    font-size: 0.72rem;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+  .score-bar {
+    height: 8px;
+    background: #1e1e3f;
+    border-radius: 4px;
+    overflow: hidden;
   }
 
-  /* QUIZ */
+  .score-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(90deg, #7c3aed, #2563eb);
+  }
+
+  /* Tags comparison */
+  .comparison-box {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (max-width: 600px) {
+    .comparison-box { grid-template-columns: 1fr; }
+    .vs-badge { display: none; }
+  }
+
+  .comparison-panel {
+    background: #0a0a18;
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .comparison-panel.bad { border: 1px solid #ef444433; }
+  .comparison-panel.good { border: 1px solid #22c55e33; }
+
+  .panel-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  .panel-label.bad { color: #ef4444; }
+  .panel-label.good { color: #22c55e; }
+
+  .vs-badge {
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 12px;
+    color: white;
+    margin-top: 30px;
+    flex-shrink: 0;
+  }
+
+  .prompt-text {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #8892b0;
+    line-height: 1.6;
+  }
+
+  .highlight-bad { color: #ef4444; }
+  .highlight-good { color: #22c55e; }
+
+  /* Quiz */
   .quiz-question {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--text);
-    line-height: 1.5;
+    font-size: 1.05rem;
+    color: #e0e0f0;
+    margin-bottom: 20px;
+    line-height: 1.6;
   }
 
   .quiz-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .quiz-option {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 16px;
-    cursor: pointer;
-    font-size: 0.88rem;
-    color: var(--text2);
-    transition: all 0.2s;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-family: monospace;
-  }
-
-  .quiz-option:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
-  .quiz-option.correct { background: rgba(52,211,153,0.1); border-color: var(--green); color: var(--green); }
-  .quiz-option.wrong { background: rgba(239,68,68,0.1); border-color: #f87171; color: #f87171; }
-  .quiz-option:disabled { cursor: not-allowed; }
-
-  .quiz-feedback {
-    margin-top: 14px;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 0.88rem;
-    line-height: 1.6;
-    display: none;
-  }
-
-  .quiz-feedback.show { display: block; }
-  .quiz-feedback.correct { background: rgba(52,211,153,0.1); border: 1px solid var(--green); color: var(--green); }
-  .quiz-feedback.wrong { background: rgba(239,68,68,0.1); border: 1px solid #f87171; color: #f87171; }
-
-  .quiz-progress {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .progress-bar {
-    flex: 1;
-    height: 6px;
-    background: var(--surface3);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent3));
-    border-radius: 3px;
-    transition: width 0.4s ease;
-  }
-
-  .score-badge {
-    font-size: 0.8rem;
-    color: var(--text3);
-    white-space: nowrap;
-  }
-
-  /* PROMPT GENERATOR */
-  .gen-controls {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 16px;
   }
 
-  @media(max-width: 600px) { .gen-controls { grid-template-columns: 1fr; } }
-
-  .control-group label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text3);
-    margin-bottom: 6px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  @media (max-width: 500px) {
+    .quiz-options { grid-template-columns: 1fr; }
   }
 
-  select, input[type="text"] {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    padding: 10px 12px;
-    font-size: 0.85rem;
-    outline: none;
-    transition: border-color 0.2s;
-    appearance: none;
-    -webkit-appearance: none;
+  .quiz-option {
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    padding: 12px 16px;
     cursor: pointer;
+    font-size: 13px;
+    color: #8892b0;
+    transition: all 0.2s;
+    text-align: left;
   }
 
-  select:focus, input[type="text"]:focus { border-color: var(--accent); }
+  .quiz-option:hover:not(:disabled) {
+    border-color: #7c3aed66;
+    color: #a78bfa;
+    background: #1e1e3f;
+  }
 
-  .select-wrapper { position: relative; }
-  .select-wrapper::after {
-    content: '▾';
+  .quiz-option.correct {
+    border-color: #22c55e;
+    background: #22c55e15;
+    color: #4ade80;
+  }
+
+  .quiz-option.wrong {
+    border-color: #ef4444;
+    background: #ef444415;
+    color: #f87171;
+  }
+
+  .quiz-option:disabled { cursor: default; }
+
+  .quiz-feedback {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+    display: none;
+    margin-top: 12px;
+  }
+
+  .quiz-feedback.correct {
+    background: #22c55e15;
+    border: 1px solid #22c55e33;
+    color: #4ade80;
+    display: block;
+  }
+
+  .quiz-feedback.wrong {
+    background: #ef444415;
+    border: 1px solid #ef444433;
+    color: #f87171;
+    display: block;
+  }
+
+  .quiz-progress {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .progress-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2a2a4a;
+    transition: background 0.3s;
+  }
+
+  .progress-dot.done { background: #7c3aed; }
+  .progress-dot.correct { background: #22c55e; }
+  .progress-dot.wrong { background: #ef4444; }
+
+  /* Simulator */
+  .sim-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    align-items: flex-end;
+  }
+
+  .sim-input-row .prompt-area {
+    flex: 1;
+    min-height: 100px;
+  }
+
+  .sim-response {
+    background: linear-gradient(135deg, #0f0f25, #0a1520);
+    border: 1px solid #2563eb33;
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.8;
+    min-height: 100px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .sim-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #6b7280;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .structure-highlight {
+    background: #7c3aed22;
+    border-left: 3px solid #7c3aed;
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+    margin: 6px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+  }
+
+  /* Tag anatomy viz */
+  .anatomy-diagram {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    font-family: 'Courier New', monospace;
+    font-size: clamp(13px, 2.5vw, 18px);
+    flex-wrap: wrap;
+    padding: 20px;
+  }
+
+  .anatomy-part {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .anatomy-text {
+    padding: 8px 4px;
+    line-height: 1;
+  }
+
+  .anatomy-arrow {
     position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text3);
-    pointer-events: none;
-    font-size: 0.8rem;
+    bottom: -30px;
+    font-size: 10px;
+    color: #6b7280;
+    text-align: center;
+    white-space: nowrap;
   }
 
-  /* PULSE ANIMATION */
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+  .arrow-line {
+    width: 1px;
+    height: 16px;
+    background: #6b7280;
+    margin: 2px auto 0;
   }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+  /* Stats badges */
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
   }
 
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(-10px); }
-    to { opacity: 1; transform: translateX(0); }
+  .stat-badge {
+    background: linear-gradient(135deg, #1e1e3f, #1a1a2e);
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    padding: 10px 16px;
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
   }
 
-  .fade-in { animation: fadeIn 0.3s ease forwards; }
+  .stat-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 
-  /* TOAST */
+  .stat-label {
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Toast */
   .toast {
     position: fixed;
     bottom: 80px;
     right: 20px;
-    background: var(--surface3);
-    border: 1px solid var(--accent);
-    color: var(--accent2);
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 0.83rem;
-    font-weight: 600;
-    box-shadow: var(--shadow);
-    z-index: 999;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.3s;
-    pointer-events: none;
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    box-shadow: 0 8px 30px #7c3aed44;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 100;
+    max-width: 280px;
   }
 
-  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.show { transform: translateX(0); }
 
-  /* MAIN */
-  main { flex: 1; padding: 0 0 40px; }
-
-  /* FOOTER */
+  /* Footer */
   footer {
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 16px 0;
+    margin-top: auto;
+    padding: 20px;
     text-align: center;
-    font-size: 0.75rem;
-    color: var(--text3);
+    border-top: 1px solid #1e1e3f;
+    color: #4b5563;
+    font-size: 13px;
+    position: relative;
+    z-index: 1;
   }
 
-  /* SCROLLBAR */
+  /* Animations */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 10px #7c3aed22; }
+    50% { box-shadow: 0 0 25px #7c3aed55; }
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide-in { animation: slide-in 0.4s ease-out; }
+
+  .typing-cursor::after {
+    content: '|';
+    animation: blink 0.8s infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--surface); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+  ::-webkit-scrollbar-track { background: #0d0d1a; }
+  ::-webkit-scrollbar-thumb { background: #2a2a4a; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #7c3aed55; }
 
-  /* GLOW */
-  .glow { box-shadow: 0 0 20px rgba(124,106,247,0.2); }
-
-  .info-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(56,189,248,0.1);
-    border: 1px solid rgba(56,189,248,0.3);
-    color: var(--accent3);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    margin-bottom: 16px;
-  }
-
-  .section-header {
+  .flex-row {
     display: flex;
+    gap: 10px;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
     flex-wrap: wrap;
-    gap: 8px;
   }
 
-  /* Animated dot */
-  .dot-anim {
-    width: 8px;
-    height: 8px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
+  .mt-12 { margin-top: 12px; }
+  .mt-16 { margin-top: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+
+  select {
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    border-radius: 8px;
+    color: #e0e0f0;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  select:focus { outline: none; border-color: #7c3aed; }
+
+  input[type="text"] {
+    background: #0a0a18;
+    border: 1px solid #2a2a4a;
+    border-radius: 8px;
+    color: #e0e0f0;
+    padding: 8px 12px;
+    font-size: 13px;
+    width: 100%;
+    transition: border-color 0.3s;
+  }
+
+  input[type="text"]:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px #7c3aed22;
   }
 </style>
 </head>
 <body>
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
 
 <header>
   <div class="container">
-    <div class="header-inner">
-      <div class="logo">🏷️</div>
-      <div class="header-text">
-        <h1>XML Tag Playground</h1>
-        <p>Interactive Claude Prompt Engineering Tool</p>
-      </div>
-      <div class="badge">🤖 Claude 2026</div>
-    </div>
+    <div class="badge">🏷️ Claude XML Fundamentals · Interactive Lab</div>
+    <h1>XML Tags: Claude's Thinking Language</h1>
+    <p class="subtitle">Explore why XML tags are fundamental to how Claude parses, structures, and responds to prompts — with live demos and interactive tools.</p>
   </div>
 </header>
 
-<main>
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('builder')">🛠️ Prompt Builder</button>
+  <button class="tab-btn" onclick="switchTab('compare')">⚖️ Compare</button>
+  <button class="tab-btn" onclick="switchTab('simulator')">🤖 Simulator</button>
+  <button class="tab-btn" onclick="switchTab('anatomy')">🔬 Anatomy</button>
+  <button class="tab-btn" onclick="switchTab('quiz')">🧩 Quiz</button>
+</div>
+
+<!-- TAB: BUILDER -->
+<div id="tab-builder" class="tab-content active">
   <div class="container">
-    <div class="hero">
-      <h2>Why <span>XML Tags</span> are Fundamental<br>to Claude</h2>
-      <p>Explore, experiment, and understand how XML tags transform Claude's ability to parse, understand, and respond to complex prompts with precision.</p>
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('playground')">🛠️ Playground</button>
-        <button class="tab-btn" onclick="switchTab('compare')">⚖️ Before/After</button>
-        <button class="tab-btn" onclick="switchTab('builder')">🏗️ Prompt Builder</button>
-        <button class="tab-btn" onclick="switchTab('visualizer')">🌳 Tree Visualizer</button>
-        <button class="tab-btn" onclick="switchTab('quiz')">🧠 Quiz</button>
+    <div class="stats-row">
+      <div class="stat-badge">
+        <div class="stat-num" id="stat-tags">0</div>
+        <div class="stat-label">XML Tags</div>
+      </div>
+      <div class="stat-badge">
+        <div class="stat-num" id="stat-depth">0</div>
+        <div class="stat-label">Max Depth</div>
+      </div>
+      <div class="stat-badge">
+        <div class="stat-num" id="stat-clarity">0%</div>
+        <div class="stat-label">Clarity Score</div>
+      </div>
+      <div class="stat-badge">
+        <div class="stat-num" id="stat-chars">0</div>
+        <div class="stat-label">Characters</div>
       </div>
     </div>
 
-    <!-- PLAYGROUND -->
-    <div id="panel-playground" class="panel active">
-      <div class="metrics-row">
-        <div class="metric-card">
-          <div class="metric-value" id="m-tags">0</div>
-          <div class="metric-label">XML Tags</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">📌 Tag Palette — Click to Insert</div>
+        <div class="tag-palette" id="tagPalette"></div>
+        
+        <div class="mb-8" style="font-size:12px;color:#6b7280;">Custom tag name:</div>
+        <div class="flex-row mb-8">
+          <input type="text" id="customTagInput" placeholder="e.g. reasoning" style="flex:1;" />
+          <button class="btn btn-secondary btn-sm" onclick="insertCustomTag()">+ Insert</button>
         </div>
-        <div class="metric-card">
-          <div class="metric-value" id="m-depth">0</div>
-          <div class="metric-label">Max Depth</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-value" id="m-score">—</div>
-          <div class="metric-label">Structure Score</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-value" id="m-words">0</div>
-          <div class="metric-label">Words</div>
+
+        <div class="flex-row mt-12">
+          <button class="btn btn-primary btn-sm" onclick="analyzePrompt()">⚡ Analyze</button>
+          <button class="btn btn-secondary btn-sm" onclick="clearPrompt()">🗑️ Clear</button>
+          <button class="btn btn-secondary btn-sm" onclick="loadTemplate()">📋 Template</button>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">⚡ Live XML Syntax Highlighter & Analyzer</div>
-        <div class="playground-grid">
-          <div class="editor-area">
-            <div class="editor-label">✏️ Your Prompt Input</div>
-            <textarea id="xmlInput" placeholder="Type or paste your Claude prompt with XML tags here...
-Example:
-<system>You are a helpful assistant.</system>
-<context>The user is a developer.</context>
-<task>Write a function that sorts an array.</task>
-<format>Return Python code with comments.</format>"></textarea>
-            <div class="btn-row">
-              <button class="btn btn-sm" onclick="highlightXML()">✨ Highlight</button>
-              <button class="btn btn-sm btn-outline" onclick="loadExample()">📋 Load Example</button>
-              <button class="btn btn-sm btn-outline" onclick="clearInput()">🗑️ Clear</button>
-            </div>
-          </div>
-          <div class="editor-area">
-            <div class="editor-label">🎨 Highlighted Output</div>
-            <div class="output-box" id="xmlOutput">Your highlighted XML will appear here...</div>
-            <div class="btn-row">
-              <button class="btn btn-sm" onclick="copyOutput()">📋 Copy</button>
-              <button class="btn btn-sm btn-outline" onclick="analyzeStructure()">🔍 Analyze</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" id="analysisCard" style="display:none;">
-        <div class="card-title">🔍 Structure Analysis</div>
-        <div id="analysisOutput" style="font-size:0.85rem; line-height:1.8; color:var(--text2);"></div>
+        <div class="card-title">✍️ Your Prompt</div>
+        <textarea class="prompt-area" id="promptEditor" placeholder="Start writing your Claude prompt here. Use the tag palette on the left to insert XML tags..." oninput="liveAnalyze()"></textarea>
       </div>
     </div>
 
-    <!-- COMPARE -->
-    <div id="panel-compare" class="panel">
-      <div class="card">
-        <div class="card-title">⚖️ Prompt Quality Comparison</div>
-        <div class="info-pill">💡 See how XML tags transform ambiguous prompts into clear instructions</div>
+    <div class="card" id="analysisCard" style="display:none;">
+      <div class="card-title">📊 Prompt Analysis</div>
+      <div id="analysisOutput"></div>
+    </div>
 
-        <div id="compareSelector" style="margin-bottom:20px;">
-          <div class="editor-label">Choose a scenario:</div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-            <button class="btn btn-sm" onclick="loadCompare(0)">📝 Writing Task</button>
-            <button class="btn btn-sm btn-outline" onclick="loadCompare(1)">💻 Code Review</button>
-            <button class="btn btn-sm btn-outline" onclick="loadCompare(2)">🎯 Role Play</button>
-            <button class="btn btn-sm btn-outline" onclick="loadCompare(3)">📊 Data Analysis</button>
+    <div class="card">
+      <div class="card-title">🎨 Syntax Highlighted Preview</div>
+      <div class="xml-display" id="xmlPreview">
+        <span class="xml-comment">// Your prompt will appear highlighted here...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: COMPARE -->
+<div id="tab-compare" class="tab-content">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">⚖️ With vs. Without XML Tags</div>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:20px;">Select a scenario to see how XML tags dramatically improve prompt clarity and Claude's response quality.</p>
+      
+      <div class="flex-row mb-16">
+        <select id="scenarioSelect" onchange="loadScenario()">
+          <option value="0">📝 Writing Task</option>
+          <option value="1">🔍 Code Review</option>
+          <option value="2">📊 Data Analysis</option>
+          <option value="3">🎓 Teaching Request</option>
+          <option value="4">🧪 Multi-step Reasoning</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="runComparison()">▶ Run Comparison</button>
+      </div>
+
+      <div class="comparison-box">
+        <div>
+          <div class="comparison-panel bad">
+            <div class="panel-label bad">❌ Without XML Tags</div>
+            <div class="prompt-text" id="compareLeft">Select a scenario above...</div>
           </div>
         </div>
-
-        <div class="compare-grid">
-          <div class="compare-box">
-            <div class="compare-header bad">❌ Without XML Tags</div>
-            <div class="compare-body" id="compareLeft">Select a scenario above...</div>
-          </div>
-          <div class="compare-box">
-            <div class="compare-header good">✅ With XML Tags</div>
-            <div class="compare-body" id="compareRight">Select a scenario above...</div>
+        <div class="vs-badge">VS</div>
+        <div>
+          <div class="comparison-panel good">
+            <div class="panel-label good">✅ With XML Tags</div>
+            <div class="prompt-text" id="compareRight">Select a scenario above...</div>
           </div>
         </div>
-
-        <div id="compareExplain" style="margin-top:16px; padding:14px; background:var(--surface2); border-radius:8px; font-size:0.85rem; color:var(--text2); line-height:1.7; display:none;"></div>
       </div>
     </div>
 
-    <!-- BUILDER -->
-    <div id="panel-builder" class="panel">
-      <div class="card">
-        <div class="card-title">🏗️ Structured Prompt Builder</div>
+    <div class="card" id="comparisonResult" style="display:none;">
+      <div class="card-title">📈 Why XML Wins</div>
+      <div id="comparisonMetrics"></div>
+    </div>
 
-        <div class="gen-controls">
-          <div class="control-group">
-            <label>Task Type</label>
-            <div class="select-wrapper">
-              <select id="taskType">
-                <option value="analysis">Data Analysis</option>
-                <option value="writing">Creative Writing</option>
-                <option value="code">Code Generation</option>
-                <option value="qa">Q&A / Research</option>
-                <option value="translate">Translation</option>
-                <option value="summary">Summarization</option>
-              </select>
-            </div>
-          </div>
-          <div class="control-group">
-            <label>Response Style</label>
-            <div class="select-wrapper">
-              <select id="responseStyle">
-                <option value="detailed">Detailed</option>
-                <option value="concise">Concise</option>
-                <option value="bullet">Bullet Points</option>
-                <option value="technical">Technical</option>
-                <option value="casual">Casual</option>
-              </select>
-            </div>
-          </div>
-          <div class="control-group">
-            <label>Your Task Description</label>
-            <input type="text" id="taskDesc" placeholder="e.g. Analyze quarterly sales data..." />
-          </div>
-          <div class="control-group">
-            <label>Context / Background</label>
-            <input type="text" id="taskContext" placeholder="e.g. B2B SaaS company, Q3 2026..." />
-          </div>
-        </div>
+    <div class="card">
+      <div class="card-title">💡 Core Benefits of XML Tags in Claude Prompts</div>
+      <div id="benefitsList"></div>
+    </div>
+  </div>
+</div>
 
-        <div style="margin-bottom:16px;">
-          <div class="editor-label" style="margin-bottom:10px;">🏷️ Select Tags to Include:</div>
-          <div class="tag-builder" id="tagSelector">
-            <!-- Tags inserted by JS -->
-          </div>
-        </div>
+<!-- TAB: SIMULATOR -->
+<div id="tab-simulator" class="tab-content">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">🤖 Claude Response Simulator</div>
+      <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Write a structured prompt with XML tags. The simulator shows how Claude interprets each section.</p>
 
-        <button class="btn" onclick="generatePrompt()">⚡ Generate Structured Prompt</button>
+      <div class="flex-row mb-16">
+        <select id="simTemplate" onchange="loadSimTemplate()">
+          <option value="">— Load a Template —</option>
+          <option value="persona">🎭 Persona + Task</option>
+          <option value="rag">📚 RAG with Context</option>
+          <option value="cot">🧠 Chain of Thought</option>
+          <option value="format">📋 Structured Output</option>
+        </select>
       </div>
 
-      <div class="card" id="generatedCard" style="display:none;">
-        <div class="section-header">
-          <div class="card-title" style="margin:0">📄 Generated Prompt</div>
-          <button class="btn btn-sm" onclick="copyGenerated()">📋 Copy</button>
-        </div>
-        <div class="output-box" id="generatedOutput"></div>
+      <div class="sim-label">PROMPT INPUT</div>
+      <textarea class="prompt-area" id="simPrompt" style="min-height:180px;" placeholder="Write your XML-tagged prompt here...&#10;&#10;Example:&#10;&lt;system&gt;You are a helpful assistant.&lt;/system&gt;&#10;&lt;user&gt;Explain quantum computing simply.&lt;/user&gt;"></textarea>
+
+      <div class="flex-row mt-12">
+        <button class="btn btn-primary" onclick="runSimulator()">🚀 Simulate Claude Response</button>
+        <button class="btn btn-secondary" onclick="clearSim()">🗑️ Clear</button>
       </div>
     </div>
 
-    <!-- VISUALIZER -->
-    <div id="panel-visualizer" class="panel">
-      <div class="card">
-        <div class="card-title">🌳 XML Tree Visualizer</div>
-        <div class="editor-area">
-          <div class="editor-label">Paste XML Prompt</div>
-          <textarea id="vizInput" style="min-height:130px;" placeholder="<prompt>
-  <system>You are an expert assistant.</system>
-  <user>
-    <context>I work in finance.</context>
-    <task>Explain derivatives.</task>
-  </user>
-</prompt>"></textarea>
-          <div class="btn-row">
-            <button class="btn btn-sm" onclick="visualizeTree()">🌳 Visualize</button>
-            <button class="btn btn-sm btn-outline" onclick="loadVizExample()">📋 Example</button>
-          </div>
-        </div>
-      </div>
+    <div class="card" id="simResultCard" style="display:none;">
+      <div class="card-title">🔍 Claude's Interpretation</div>
+      <div id="simInterpretation"></div>
+      <div class="mt-16 sim-label">SIMULATED RESPONSE</div>
+      <div class="sim-response" id="simResponse"></div>
+    </div>
+  </div>
+</div>
 
-      <div class="card" id="treeCard" style="display:none;">
-        <div class="card-title">📁 Tag Hierarchy</div>
-        <div class="xml-tree" id="treeOutput"></div>
-        <div style="margin-top:12px; font-size:0.78rem; color:var(--
+<!-- TAB: ANATOMY -->
+<div id="tab-anatomy" class="tab-content">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">🔬 XML Tag Anatomy</div>
+      <div class="anatomy-diagram">
+        <div class="anatomy-part">
+          <div class="anatomy-text" style="color:#f472b6;">&lt;</div>
+        </div>
+        <div class="anatomy-part">
+          <div class="anatomy-text" style="color:#34d399;font-weight:700;">instruction</div>
+          <div class="anatomy-arrow">tag name<div class="arrow-line"></div></div>
+        </div>
+        <div class="anatomy-part">
+          <div class="anatomy-text" style="color:#f472b6;">&gt;</div>
+        </div>
+        <div class="anatomy-part">
+          <div class="anatomy-text" style="color:#e0e0f0;margin:0 8px;">Tell me about Mars
