@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Allmendinger Racing Simulator</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    background: #0a0a0f;
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .stars {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    from { opacity: 0.2; }
+    to { opacity: 0.9; }
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    padding: 40px 20px 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .logo {
+    font-size: 14px;
+    letter-spacing: 4px;
+    color: #ff3e3e;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  header h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #ff3e3e, #ff8c00, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+  }
+
+  header p {
+    color: #888;
+    font-size: 1rem;
+    letter-spacing: 1px;
+  }
+
+  .driver-card {
+    background: linear-gradient(135deg, rgba(255,62,62,0.1), rgba(255,140,0,0.05));
+    border: 1px solid rgba(255,62,62,0.3);
+    border-radius: 20px;
+    padding: 25px;
+    margin: 30px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    flex-wrap: wrap;
+  }
+
+  .driver-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff3e3e, #ff8c00);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 30px rgba(255,62,62,0.5);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 30px rgba(255,62,62,0.5); }
+    50% { box-shadow: 0 0 50px rgba(255,62,62,0.8); }
+  }
+
+  .driver-info h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+  }
+
+  .driver-info .number {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #ff3e3e;
+    line-height: 1;
+  }
+
+  .driver-info p {
+    color: #aaa;
+    font-size: 0.9rem;
+    margin-top: 5px;
+  }
+
+  .driver-stats {
+    display: flex;
+    gap: 20px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #ffd700;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 10px 22px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    color: #aaa;
+  }
+
+  .tab.active, .tab:hover {
+    background: linear-gradient(135deg, #ff3e3e, #ff8c00);
+    border-color: transparent;
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  .section {
+    display: none;
+  }
+
+  .section.active {
+    display: block;
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === LAP SIMULATOR === */
+  .track-container {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+  }
+
+  .track-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  .track-header h3 {
+    font-size: 1.3rem;
+    color: #ffd700;
+  }
+
+  .track-select {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 8px 15px;
+    color: #fff;
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .track-select option {
+    background: #1a1a2e;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    background: #0d1117;
+    margin-bottom: 20px;
+  }
+
+  #trackCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .lap-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 12px 28px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: all 0.3s;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #ff3e3e, #ff8c00);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255,62,62,0.4);
+  }
+
+  .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: #aaa;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .btn-secondary:hover {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+  }
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .lap-time-display {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #00ff88;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lap-timer-label {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .leaderboard {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 15px;
+    overflow: hidden;
+  }
+
+  .lb-header {
+    background: rgba(255,62,62,0.15);
+    padding: 12px 20px;
+    display: grid;
+    grid-template-columns: 40px 1fr 120px 80px;
+    font-size: 0.8rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    gap: 10px;
+  }
+
+  .lb-row {
+    padding: 14px 20px;
+    display: grid;
+    grid-template-columns: 40px 1fr 120px 80px;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+    font-size: 0.95rem;
+  }
+
+  .lb-row:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
+  .lb-row.you {
+    background: rgba(255,62,62,0.08);
+    border-left: 3px solid #ff3e3e;
+  }
+
+  .pos {
+    font-weight: 800;
+    color: #ffd700;
+    font-size: 1.1rem;
+  }
+
+  .pos.p1 { color: #ffd700; }
+  .pos.p2 { color: #c0c0c0; }
+  .pos.p3 { color: #cd7f32; }
+
+  .gap-time {
+    color: #ff3e3e;
+    font-size: 0.85rem;
+  }
+
+  /* === STRATEGY CALCULATOR === */
+  .strategy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 700px) {
+    .strategy-grid { grid-template-columns: 1fr; }
+    .lb-header, .lb-row { grid-template-columns: 30px 1fr 100px 60px; font-size: 0.8rem; }
+  }
+
+  .input-group {
+    margin-bottom: 18px;
+  }
+
+  .input-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .input-group input, .input-group select {
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 12px 15px;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  .input-group input:focus, .input-group select:focus {
+    border-color: #ff3e3e;
+  }
+
+  .input-group select option { background: #1a1a2e; }
+
+  .strategy-result {
+    background: linear-gradient(135deg, rgba(255,62,62,0.1), rgba(255,140,0,0.05));
+    border: 1px solid rgba(255,62,62,0.2);
+    border-radius: 15px;
+    padding: 25px;
+  }
+
+  .strategy-result h3 {
+    color: #ffd700;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .result-item {
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+  }
+
+  .result-val {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #00ff88;
+  }
+
+  .result-lbl {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .pit-timeline {
+    margin-top: 15px;
+  }
+
+  .timeline-bar {
+    height: 30px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .timeline-fill {
+    height: 100%;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .stint-1 { background: linear-gradient(90deg, #ff3e3e, #ff6b00); }
+  .stint-2 { background: linear-gradient(90deg, #3e9fff, #00d4ff); }
+  .stint-3 { background: linear-gradient(90deg, #a855f7, #ec4899); }
+
+  /* === TRIVIA QUIZ === */
+  .quiz-container {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 30px;
+  }
+
+  .quiz-progress {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 25px;
+  }
+
+  .q-dot {
+    flex: 1;
+    height: 5px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.1);
+    transition: background 0.3s;
+  }
+
+  .q-dot.done { background: #00ff88; }
+  .q-dot.current { background: #ff3e3e; }
+
+  .quiz-question {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+    line-height: 1.5;
+    color: #eee;
+  }
+
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 500px) {
+    .quiz-options { grid-template-columns: 1fr; }
+  }
+
+  .quiz-opt {
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-size: 0.95rem;
+    text-align: left;
+    color: #ccc;
+  }
+
+  .quiz-opt:hover:not(.disabled) {
+    background: rgba(255,62,62,0.15);
+    border-color: rgba(255,62,62,0.4);
+    color: #fff;
+    transform: translateX(5px);
+  }
+
+  .quiz-opt.correct {
+    background: rgba(0,255,136,0.15);
+    border-color: #00ff88;
+    color: #00ff88;
+  }
+
+  .quiz-opt.wrong {
+    background: rgba(255,62,62,0.15);
+    border-color: #ff3e3e;
+    color: #ff3e3e;
+  }
+
+  .quiz-opt.disabled { cursor: default; }
+
+  .quiz-feedback {
+    min-height: 50px;
+    padding: 15px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #aaa;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .quiz-score-board {
+    text-align: center;
+    padding: 30px;
+  }
+
+  .final-score {
+    font-size: 5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .score-msg {
+    font-size: 1.2rem;
+    color: #aaa;
+    margin: 10px 0 25px;
+  }
+
+  /* === SPEED CHART === */
+  .chart-container {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+  }
+
+  .chart-title {
+    font-size: 1.1rem;
+    color: #ffd700;
+    margin-bottom: 20px;
+  }
+
+  #speedCanvas {
+    width: 100%;
+    display: block;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #aaa;
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .career-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+  }
+
+  .career-stat {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .career-stat:hover {
+    border-color: rgba(255,62,62,0.4);
+    background: rgba(255,62,62,0.07);
+    transform: translateY(-3px);
+  }
+
+  .c-val {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #ff3e3e;
+  }
+
+  .c-lbl {
+    font-size: 0.78rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 5px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #ff3e3e, #ff8c00);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    z-index: 999;
+    transform: translateX(200px);
+    opacity: 0;
+    transition: all 0.4s;
+    pointer-events: none;
+  }
+
+  .toast.show {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: #444;
+    font-size: 0.85rem;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .speed-meter {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+
+  .meter-label {
+    font-size: 0.8rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    min-width: 80px;
+  }
+
+  .meter-bar-wrap {
+    flex: 1;
+    height: 12px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 6px;
+    overflow: hidden;
+    min-width: 100px;
+  }
+
+  .meter-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.5s ease;
+  }
+
+  .meter-val {
+    font-weight: 800;
+    min-width: 55px;
+    text-align: right;
+    font-size: 1rem;
+  }
+
+  .race-incident {
+    background: rgba(255,62,62,0.1);
+    border: 1px solid rgba(255,62,62,0.3);
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #ff8c8c;
+    display: none;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 20px;
+  }
+
+  .section-card h3 {
+    color: #ffd700;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<div class="toast" id="toast"></div>
+
+<header>
+  <div class="logo">NASCAR Cup Series</div>
+  <h1>AJ Allmendinger Hub</h1>
+  <p>Interactive Racing Experience · #16 Kaulig Racing</p>
+</header>
+
+<div class="container">
+
+  <div class="driver-card">
+    <div class="driver-avatar">🏎️</div>
+    <div class="driver-info">
+      <div class="number">#16</div>
+      <h2>AJ Allmendinger</h2>
+      <p>Kaulig Racing · Road Course Specialist</p>
+    </div>
+    <div class="driver-stats">
+      <div class="stat-item">
+        <div class="stat-value">1</div>
+        <div class="stat-label">Championships</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">9</div>
+        <div class="stat-label">Cup Wins</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">375+</div>
+        <div class="stat-label">Cup Starts</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">2022</div>
+        <div class="stat-label">Xfinity Champ</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('lap')">🏁 Lap Simulator</div>
+    <div class="tab" onclick="switchTab('strategy')">⚙️ Pit Strategy</div>
+    <div class="tab" onclick="switchTab('quiz')">🧠 Driver Quiz</div>
+    <div class="tab" onclick="switchTab('stats')">📊 Career Stats</div>
+  </div>
+
+  <!-- LAP SIMULATOR -->
+  <div class="section active" id="sec-lap">
+    <div class="track-container">
+      <div class="track-header">
+        <h3>🏁 Track Lap Simulator</h3>
+        <select class="track-select" id="trackSelect" onchange="changeTrack()">
+          <option value="watkins">Watkins Glen</option>
+          <option value="sonoma">Sonoma Raceway</option>
+          <option value="cota">COTA</option>
+          <option value="charlotte">Charlotte Roval</option>
+          <option value="indy">Indianapolis Road Course</option>
+        </select>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="trackCanvas" width="800" height="300"></canvas>
+      </div>
+      <div class="lap-controls">
+        <button class="btn btn-primary" id="lapBtn" onclick="startLap()">▶ START LAP</button>
+        <button class="btn btn-secondary" onclick="resetLap()">↺ Reset</button>
+        <div style="margin-left:auto; text-align:right;">
+          <div class="lap-timer-label">LAP TIME</div>
+          <div class="lap-time-display" id="lapDisplay">0:00.000</div>
+        </div>
+      </div>
+
+      <div id="raceIncident" class="race-incident">
+        ⚠️ Incident on track! Yellow flag deployed. AJ Allmendinger boxes for fresh tires!
+      </div>
+
+      <div class="speed-meter">
+        <span class="meter-label">Speed</span>
+        <div class="meter-bar-wrap">
+          <div class="meter-fill" id="speedFill" style="width:0%; background: linear-gradient(90deg, #ff3e3e, #ffd700);"></div>
+        </div>
+        <span class="meter-val" id="speedVal" style="color:#ffd700;">0 mph</span>
+      </div>
+
+      <div class="speed-meter">
+        <span class="meter-label">Throttle</span>
+        <div class="meter-bar-wrap">
+          <div class="meter-fill" id="throttleFill" style="width:0%; background: linear-gradient(90deg, #00ff88, #00d4ff);"></div>
+        </div>
+        <span class="meter-val" id="throttleVal" style="color:#00ff88;">0%</span>
+      </div>
+
+      <div class="speed-meter">
+        <span class="meter-label">Tire Wear</span>
+        <div class="meter-bar-wrap">
+          <div class="meter-fill" id="tireFill" style="width:100%; background: linear-gradient(90deg, #00ff88, #a855f7);"></div>
+        </div>
+        <span class="meter-val" id="tireVal" style="color:#a855f7;">100%</span>
+      </div>
+    </div>
+
+    <div class="leaderboard">
+      <div class="lb-header">
+        <span>Pos</span>
+        <span>Driver</span>
+        <span>Best Lap</span>
+        <span>Gap</span>
+      </div>
+      <div id="leaderboardRows"></div>
+    </div>
+  </div>
+
+  <!-- STRATEGY -->
+  <div class="section" id="sec-strategy">
+    <div class="section-card">
+      <h3>⚙️ Pit Stop Strategy Calculator</h3>
+      <div class="strategy-grid">
+        <div>
+          <div class="input-group">
+            <label>Total Race Laps</label>
+            <input type="number" id="totalLaps" value="70" min="20" max="200">
+          </div>
+          <div class="input-group">
+            <label>Lap Time (seconds)</label>
+            <input type="number" id="lapTime" value="95" min="50" max="200" step="0.1">
+          </div>
+          <div class="input-group">
+            <label>Fuel Window (laps)</label>
+            <input type="number" id="fuelWindow" value="28" min="10" max="60">
+          </div>
+          <div class="input-group">
+            <label>Pit Stop Time (seconds)</label>
+            <input type="number" id="pitTime" value="22" min="10" max="45">
+          </div>
+          <div class="input-group">
+            <label>Strategy Type</label>
+            <select id="stratType">
+              <option value="2stop">2-Stop</option>
+              <option value="3stop">3-Stop</option>
+              <option value="1stop">1-Stop (Fuel Save)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="calcStrategy()" style="width:100%;">Calculate Strategy</button>
+        </div>
+
+        <div class="strategy-result" id="stratResult">
+          <h3>📋 Strategy Output</h3>
+          <p style="color:#555;">Enter values and click Calculate to see your pit strategy.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <h3>🔧 AJ's Road Course Advantage</h3>
+      <p style="color:#888; margin-bottom:15px; font-size:0.9rem;">AJ Allmendinger is one of NASCAR's elite road course specialists. Compare his performance to the field on road circuits.</p>
+      <div class="result-grid">
+        <div class="result-item">
+          <div class="result-val" style="color:#ffd700;">+2.4s</div>
+          <div class="result-lbl">Avg Road Course Advantage</div>
+        </div>
+        <div class="result-item">
+          <div class="result-val" style="color:#00ff88;">78%</div>
