@@ -1,0 +1,297 @@
+<html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인플레이션 & 금리 영향 시뮬레이터</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0d0d1a;color:#e0e0f0;font-family:'Segoe UI',sans-serif;min-height:100vh;padding:16px}
+  .container{max-width:800px;margin:0 auto}
+  .header{background:linear-gradient(135deg,#1a0a3a,#0a1a3a);border:1px solid #4a2a8a;border-radius:16px;padding:24px;margin-bottom:20px}
+  .header h1{font-size:1.4rem;color:#c084fc;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .header p{font-size:0.88rem;color:#a0a0c0;line-height:1.6}
+  .badge{background:#4a2a8a;color:#c084fc;font-size:0.7rem;padding:3px 10px;border-radius:20px;font-weight:700;letter-spacing:1px}
+  .section-title{font-size:0.95rem;color:#818cf8;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .card{background:#111128;border:1px solid #2a2a5a;border-radius:12px;padding:20px;margin-bottom:16px}
+  .input-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:500px){.input-grid{grid-template-columns:1fr}}
+  .input-group label{display:block;font-size:0.8rem;color:#818cf8;margin-bottom:6px;font-weight:600}
+  .input-group input[type=range]{width:100%;accent-color:#818cf8;cursor:pointer;height:6px}
+  .input-group .val-display{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  .val-display span{font-size:1.1rem;font-weight:700;color:#c084fc}
+  .val-display small{font-size:0.75rem;color:#666}
+  .btn{background:linear-gradient(135deg,#6d28d9,#2563eb);color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;width:100%;margin-top:8px;transition:opacity 0.2s,transform 0.1s}
+  .btn:hover{opacity:0.88;transform:translateY(-1px)}
+  .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:14px}
+  .result-card{background:#0d0d2a;border-radius:10px;padding:14px;text-align:center;border:1px solid #2a2a5a;transition:border-color 0.3s}
+  .result-card.positive{border-color:#22d3ee}
+  .result-card.negative{border-color:#f87171}
+  .result-card.neutral{border-color:#818cf8}
+  .result-card .rc-label{font-size:0.72rem;color:#888;margin-bottom:6px}
+  .result-card .rc-value{font-size:1.3rem;font-weight:800}
+  .positive .rc-value{color:#22d3ee}
+  .negative .rc-value{color:#f87171}
+  .neutral .rc-value{color:#c084fc}
+  .result-card .rc-sub{font-size:0.7rem;color:#666;margin-top:4px}
+  .asset-grid{display:grid;grid-template-columns:1fr;gap:10px}
+  .asset-row{display:grid;grid-template-columns:120px 1fr 70px;align-items:center;gap:10px;background:#0d0d2a;border-radius:8px;padding:10px 14px}
+  .asset-name{font-size:0.82rem;color:#a0a0c0;font-weight:600}
+  .bar-wrap{background:#1a1a3a;border-radius:20px;height:10px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:20px;transition:width 0.6s ease}
+  .bar-pos{background:linear-gradient(90deg,#22d3ee,#6d28d9)}
+  .bar-neg{background:linear-gradient(90deg,#f87171,#dc2626)}
+  .asset-pct{font-size:0.85rem;font-weight:700;text-align:right}
+  .tip-box{background:#0a1a0a;border:1px solid #166534;border-radius:10px;padding:14px;margin-top:14px}
+  .tip-box .tip-title{color:#4ade80;font-size:0.82rem;font-weight:700;margin-bottom:8px}
+  .tip-box ul{list-style:none;padding:0}
+  .tip-box ul li{font-size:0.8rem;color:#86efac;padding:3px 0;display:flex;gap:6px}
+  .tip-box ul li::before{content:"✦";color:#22d3ee;flex-shrink:0}
+  .warn-box{background:#1a0a0a;border:1px solid #7f1d1d;border-radius:10px;padding:14px;margin-top:10px}
+  .warn-box .warn-title{color:#fca5a5;font-size:0.82rem;font-weight:700;margin-bottom:8px}
+  .warn-box ul li{color:#fca5a5}
+  .warn-box ul li::before{content:"⚠";color:#f87171;flex-shrink:0}
+  .scenario-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .tab-btn{background:#1a1a3a;border:1px solid #2a2a5a;color:#888;padding:7px 14px;border-radius:8px;font-size:0.78rem;cursor:pointer;transition:all 0.2s;font-weight:600}
+  .tab-btn.active{background:#6d28d9;border-color:#818cf8;color:#fff}
+  .footer{text-align:center;font-size:0.75rem;color:#444;padding:20px 0 8px;border-top:1px solid #1a1a3a;margin-top:20px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>📊 인플레이션 & 금리 영향 시뮬레이터 <span class="badge">LIVE</span></h1>
+    <p>2026년 현재 글로벌 금융시장은 인플레이션과 금리 변동의 복합적 영향 아래 놓여 있습니다. 미 연준의 금리 정책이 불확실한 가운데, 투자자들은 자산 배분 전략을 재검토해야 하는 시점에 직면해 있습니다. 아래 시뮬레이터로 금리·인플레이션 변화가 주요 자산에 미치는 영향을 직접 확인해보세요.</p>
+  </div>
+
+  <div class="card">
+    <div class="section-title">⚙️ 시나리오 빠른 선택</div>
+    <div class="scenario-tabs">
+      <button class="tab-btn active" data-scenario="custom">직접 설정</button>
+      <button class="tab-btn" data-scenario="hike">금리 인상기</button>
+      <button class="tab-btn" data-scenario="cut">금리 인하기</button>
+      <button class="tab-btn" data-scenario="stagflation">스태그플레이션</button>
+      <button class="tab-btn" data-scenario="goldilocks">골디락스</button>
+    </div>
+
+    <div class="input-grid">
+      <div class="input-group">
+        <label>기준금리 (%)</label>
+        <div class="val-display"><span id="rateVal">4.5</span><small>0% ~ 10%</small></div>
+        <input type="range" id="rateSlider" min="0" max="10" step="0.25" value="4.5">
+      </div>
+      <div class="input-group">
+        <label>인플레이션율 (%)</label>
+        <div class="val-display"><span id="inflVal">3.2</span><small>0% ~ 15%</small></div>
+        <input type="range" id="inflSlider" min="0" max="15" step="0.1" value="3.2">
+      </div>
+      <div class="input-group">
+        <label>내 투자 원금 (만원)</label>
+        <div class="val-display"><span id="principalVal">1,000</span><small>100 ~ 10,000</small></div>
+        <input type="range" id="principalSlider" min="100" max="10000" step="100" value="1000">
+      </div>
+      <div class="input-group">
+        <label>투자 기간 (년)</label>
+        <div class="val-display"><span id="yearVal">5</span><small>1 ~ 30년</small></div>
+        <input type="range" id="yearSlider" min="1" max="30" step="1" value="5">
+      </div>
+    </div>
+    <button class="btn" id="calcBtn">📈 영향 분석하기</button>
+  </div>
+
+  <div class="card hidden" id="resultSection">
+    <div class="section-title">💰 내 자산 구매력 변화</div>
+    <div class="result-grid" id="resultGrid"></div>
+
+    <div class="section-title" style="margin-top:20px">📦 주요 자산별 예상 반응</div>
+    <div class="asset-grid" id="assetGrid"></div>
+
+    <div id="tipBox"></div>
+  </div>
+
+  <footer class="footer">🤖 AI Trend App · 2026-03-02 · Impact of Inflation and Interest Rates on Financial Markets</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const rateSlider = document.getElementById('rateSlider');
+  const inflSlider = document.getElementById('inflSlider');
+  const principalSlider = document.getElementById('principalSlider');
+  const yearSlider = document.getElementById('yearSlider');
+  const rateVal = document.getElementById('rateVal');
+  const inflVal = document.getElementById('inflVal');
+  const principalVal = document.getElementById('principalVal');
+  const yearVal = document.getElementById('yearVal');
+  const calcBtn = document.getElementById('calcBtn');
+  const resultSection = document.getElementById('resultSection');
+  const resultGrid = document.getElementById('resultGrid');
+  const assetGrid = document.getElementById('assetGrid');
+  const tipBox = document.getElementById('tipBox');
+
+  const scenarios = {
+    hike:        { rate: 6.5,  infl: 5.5,  label: '금리 인상기' },
+    cut:         { rate: 2.0,  infl: 1.8,  label: '금리 인하기' },
+    stagflation: { rate: 5.0,  infl: 9.0,  label: '스태그플레이션' },
+    goldilocks:  { rate: 3.0,  infl: 2.0,  label: '골디락스' },
+    custom:      { rate: null, infl: null, label: '직접 설정' }
+  };
+
+  function fmt(n){ return n.toLocaleString('ko-KR', {maximumFractionDigits:1}); }
+  function fmtW(n){ return n >= 10000 ? (n/10000).toFixed(2)+'억' : fmt(Math.round(n))+'만'; }
+
+  function updateDisplay(){
+    if(rateVal) rateVal.textContent = parseFloat(rateSlider.value).toFixed(2);
+    if(inflVal) inflVal.textContent = parseFloat(inflSlider.value).toFixed(1);
+    if(principalVal) principalVal.textContent = fmt(parseInt(principalSlider.value));
+    if(yearVal) yearVal.textContent = yearSlider.value;
+  }
+
+  if(rateSlider) rateSlider.addEventListener('input', updateDisplay);
+  if(inflSlider) inflSlider.addEventListener('input', updateDisplay);
+  if(principalSlider) principalSlider.addEventListener('input', updateDisplay);
+  if(yearSlider) yearSlider.addEventListener('input', updateDisplay);
+
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      const sc = btn.dataset.scenario;
+      if(sc !== 'custom' && scenarios[sc]){
+        rateSlider.value = scenarios[sc].rate;
+        inflSlider.value = scenarios[sc].infl;
+        updateDisplay();
+      }
+    });
+  });
+
+  function getAssetImpact(rate, infl){
+    const realRate = rate - infl;
+    const assets = [
+      {
+        name:'🏦 예금/적금',
+        calc: function(){
+          const base = rate - 1.5;
+          return Math.min(Math.max(base, -3), 5);
+        },
+        desc:'금리 연동'
+      },
+      {
+        name:'📈 국내 주식',
+        calc: function(){
+          let s = -rate * 0.9 + infl * 0.3;
+          if(realRate < 0) s += 2;
+          if(rate < 3) s += 3;
+          return Math.min(Math.max(s, -12), 12);
+        },
+        desc:'금리 역상관'
+      },
+      {
+        name:'🏠 부동산',
+        calc: function(){
+          let s = -rate * 1.2 + infl * 0.8;
+          if(infl > 5) s += 2;
+          return Math.min(Math.max(s, -10), 10);
+        },
+        desc:'인플레 헤지'
+      },
+      {
+        name:'🥇 금(Gold)',
+        calc: function(){
+          let s = -realRate * 1.5;
+          if(infl > 5) s += 3;
+          return Math.min(Math.max(s, -8), 10);
+        },
+        desc:'실질금리 역상관'
+      },
+      {
+        name:'🌐 미국채(10Y)',
+        calc: function(){
+          let s = -rate * 1.8 + 5;
+          return Math.min(Math.max(s, -14), 8);
+        },
+        desc:'금리 직격탄'
+      },
+      {
+        name:'💹 달러화',
+        calc: function(){
+          let s = rate * 0.7 - infl * 0.4;
+          return Math.min(Math.max(s, -6), 8);
+        },
+        desc:'금리차 연동'
+      }
+    ];
+    return assets.map(function(a){ return { name:a.name, pct:parseFloat(a.calc().toFixed(1)), desc:a.desc }; });
+  }
+
+  if(calcBtn){
+    calcBtn.addEventListener('click', function(){
+      const rate = parseFloat(rateSlider.value);
+      const infl = parseFloat(inflSlider.value);
+      const principal = parseInt(principalSlider.value);
+      const years = parseInt(yearSlider.value);
+      const realRate = rate - infl;
+      const purchasingPower = principal * Math.pow(1 - infl/100, years);
+      const depositReturn = principal * Math.pow(1 + (rate - 1.5)/100, years);
+      const realReturn = depositReturn * Math.pow(1 - infl/100, years);
+      const lostValue = principal - purchasingPower;
+
+      if(resultGrid){
+        const cards = [
+          { label:'실질금리', value: realRate.toFixed(2)+'%', sub:'금리 - 인플레', cls: realRate >= 0 ? 'positive' : 'negative' },
+          { label:`${years}년 후 구매력`, value: fmtW(purchasingPower)+'원', sub:`${fmt(Math.round(lostValue))}만원 손실`, cls: purchasingPower >= principal ? 'positive' : 'negative' },
+          { label:'예금 명목수익', value: fmtW(depositReturn)+'원', sub:'세전 기준', cls:'neutral' },
+          { label:'예금 실질수익', value: fmtW(realReturn)+'원', sub:'물가 반영 후', cls: realReturn >= principal ? 'positive' : 'negative' }
+        ];
+        resultGrid.innerHTML = cards.map(function(c){
+          return '<div class="result-card '+c.cls+'"><div class="rc-label">'+c.label+'</div><div class="rc-value">'+c.value+'</div><div class="rc-sub">'+c.sub+'</div></div>';
+        }).join('');
+      }
+
+      const assets = getAssetImpact(rate, infl);
+      if(assetGrid){
+        const maxAbs = Math.max.apply(null, assets.map(function(a){ return Math.abs(a.pct); }));
+        assetGrid.innerHTML = assets.map(function(a){
+          const isPos = a.pct >= 0;
+          const barPct = maxAbs > 0 ? Math.abs(a.pct) / maxAbs * 100 : 0;
+          const sign = isPos ? '+' : '';
+          const cls = isPos ? 'bar-pos' : 'bar-neg';
+          const txtCls = isPos ? '#22d3ee' : '#f87171';
+          return '<div class="asset-row"><div class="asset-name">'+a.name+'</div><div class="bar-wrap"><div class="bar-fill '+cls+'" style="width:'+barPct+'%"></div></div><div class="asset-pct" style="color:'+txtCls+'">'+sign+a.pct+'%</div></div>';
+        }).join('');
+      }
+
+      if(tipBox){
+        const tips = [], warns = [];
+        if(realRate < 0){ warns.push('실질금리가 음수입니다. 예금만으론 자산이 줄어듭니다.'); }
+        if(infl > 5){ warns.push('고인플레이션 구간: 현금 보유 비중을 줄이세요.'); tips.push('금·부동산·물가연동채권(TIPS) 편입을 고려하세요.'); }
+        if(rate > 5){ warns.push('고금리 구간: 부채 레버리지 투자는 매우 위험합니다.'); tips.push('단기 채권·예금으로 안전 수익 확보 기회입니다.'); }
+        if(rate < 2.5){ tips.push('저금리 구간: 주식·부동산이 상대적으로 유리합니다.'); }
+        if(realRate > 2){ tips.push('실질금리 양수: 채권 및 예금 비중 확대를 검토하세요.'); }
+        tips.push('분산 투자로 특정 자산 리스크를 줄이세요.');
+        tips.push('매월 리밸런싱으로 목표 비중을 유지하세요.');
+
+        let html = '';
+        if(tips.length){
+          html += '<div class="tip-box"><div class="tip-title">💡 현재 환경 투자 팁</div><ul>'+tips.map(function(t){ return '<li>'+t+'</li>'; }).join('')+'</ul></div>';
+        }
+        if(warns.length){
+          html += '<div class="warn-box"><div class="warn-title">⚠️ 주의 사항</div><ul class="tip-box" style="background:none;border:none;padding:0">'+warns.map(function(w){ return '<li style="color:#fca5a5;display:flex;gap:6px;font-size:0.8rem;padding:3px 0"><span style=\'color:#f87171;flex-shrink:0\'>⚠</span>'+w+'</li>'; }).join('')+'</ul></div>';
+        }
+        tipBox.innerHTML = html;
+      }
+
+      if(resultSection) resultSection.classList.remove('hidden');
+      if(resultSection) resultSection.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  }
+
+  updateDisplay();
+});
+</script>
+</body>
+</html>
