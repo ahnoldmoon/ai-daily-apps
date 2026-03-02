@@ -1,0 +1,346 @@
+<html>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ActorAwards 2026 · 시상식 대시보드</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0d0d1a;color:#e0e0f0;font-family:'Segoe UI',sans-serif;min-height:100vh;padding:16px}
+  .wrap{max-width:800px;margin:0 auto}
+  .hero{background:linear-gradient(135deg,#1a0a2e,#0d1a3a);border:1px solid #7c3aed55;border-radius:16px;padding:24px;margin-bottom:20px}
+  .hero h1{font-size:1.7rem;background:linear-gradient(90deg,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+  .hero .badge{display:inline-block;background:#7c3aed33;color:#a78bfa;border:1px solid #7c3aed;border-radius:20px;padding:3px 12px;font-size:.75rem;margin-bottom:12px}
+  .hero p{color:#94a3b8;font-size:.9rem;line-height:1.6}
+  .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+  .tab{padding:8px 18px;border-radius:20px;border:1px solid #334155;background:transparent;color:#94a3b8;cursor:pointer;font-size:.85rem;transition:all .2s}
+  .tab.active{background:linear-gradient(135deg,#7c3aed,#0ea5e9);color:#fff;border-color:transparent}
+  .tab:hover:not(.active){border-color:#7c3aed;color:#a78bfa}
+  .section{display:none}
+  .section.active{display:block}
+  /* 수상 비교 카드 */
+  .filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+  .filter-bar select{background:#1e1e3a;border:1px solid #334155;color:#e0e0f0;padding:6px 12px;border-radius:8px;font-size:.82rem;cursor:pointer}
+  .filter-bar label{color:#94a3b8;font-size:.82rem}
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .card{background:#141428;border:1px solid #1e2a4a;border-radius:12px;padding:16px;transition:transform .2s,border-color .2s;position:relative;overflow:hidden}
+  .card:hover{transform:translateY(-3px);border-color:#7c3aed88}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#7c3aed,#38bdf8)}
+  .card .award-name{font-size:.72rem;color:#38bdf8;margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+  .card .nominee{font-size:1rem;font-weight:700;color:#e0e0f0;margin-bottom:4px}
+  .card .work{font-size:.8rem;color:#94a3b8;margin-bottom:10px}
+  .card .platform{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;margin-bottom:8px}
+  .platform.streaming{background:#0ea5e933;color:#38bdf8;border:1px solid #0ea5e955}
+  .platform.theater{background:#7c3aed33;color:#a78bfa;border:1px solid #7c3aed55}
+  .card .won{display:flex;align-items:center;gap:5px;font-size:.78rem}
+  .won .trophy{font-size:1rem}
+  .won.yes{color:#fbbf24}
+  .won.no{color:#475569}
+  .stat-bar{height:5px;background:#1e2a4a;border-radius:3px;margin-top:10px}
+  .stat-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#7c3aed,#38bdf8);transition:width .6s ease}
+  /* 플랫폼 비교 */
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+  @media(max-width:500px){.compare-grid{grid-template-columns:1fr}}
+  .cbox{background:#141428;border:1px solid #1e2a4a;border-radius:12px;padding:16px}
+  .cbox h3{font-size:.9rem;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+  .cbox.stream h3{color:#38bdf8}
+  .cbox.theater h3{color:#a78bfa}
+  .bar-row{margin-bottom:10px}
+  .bar-label{display:flex;justify-content:space-between;font-size:.78rem;color:#94a3b8;margin-bottom:3px}
+  .bar-track{height:8px;background:#1e2a4a;border-radius:4px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:4px;transition:width .8s ease}
+  .stream-fill{background:linear-gradient(90deg,#0ea5e9,#38bdf8)}
+  .theater-fill{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+  /* 인기도 투표 */
+  .vote-list{display:flex;flex-direction:column;gap:10px}
+  .vote-item{background:#141428;border:1px solid #1e2a4a;border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px}
+  .vote-item .info{flex:1}
+  .vote-item .name{font-weight:700;font-size:.95rem;margin-bottom:2px}
+  .vote-item .sub{font-size:.78rem;color:#94a3b8}
+  .vote-btn{background:linear-gradient(135deg,#7c3aed,#0ea5e9);border:none;color:#fff;padding:7px 16px;border-radius:20px;cursor:pointer;font-size:.82rem;white-space:nowrap;transition:opacity .2s}
+  .vote-btn:hover{opacity:.85}
+  .vote-btn:disabled{opacity:.5;cursor:default}
+  .vote-bar-wrap{margin-top:8px}
+  .vote-pct{font-size:.75rem;color:#a78bfa;margin-bottom:3px}
+  .vote-track{height:6px;background:#1e2a4a;border-radius:3px;overflow:hidden}
+  .vote-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#38bdf8);border-radius:3px;transition:width .5s ease}
+  .total-votes{text-align:right;font-size:.75rem;color:#475569;margin-top:6px}
+  /* 타임라인 */
+  .timeline{position:relative;padding-left:24px}
+  .timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#7c3aed,#38bdf8)}
+  .tl-item{position:relative;margin-bottom:18px}
+  .tl-dot{position:absolute;left:-20px;top:4px;width:12px;height:12px;border-radius:50%;background:#7c3aed;border:2px solid #a78bfa;box-shadow:0 0 8px #7c3aed88}
+  .tl-date{font-size:.72rem;color:#38bdf8;margin-bottom:2px}
+  .tl-title{font-size:.9rem;font-weight:700;margin-bottom:2px}
+  .tl-desc{font-size:.78rem;color:#94a3b8}
+  footer{text-align:center;margin-top:28px;padding:14px;background:#141428;border-radius:10px;border:1px solid #1e2a4a;font-size:.78rem;color:#475569}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="badge">🏆 TRENDING · 2026-03-02</div>
+    <h1>ActorAwards 2026 대시보드</h1>
+    <p>2026년 배우 시상식 시즌이 절정에 달하며 스트리밍 플랫폼 작품들이 기존 극장 영화와 치열하게 경쟁하고 있습니다. 수상 결과가 연이어 발표되면서 미디어 소비 패턴의 변화를 상징적으로 보여주는 시즌으로 평가받고 있습니다. 아래에서 주요 수상 후보 비교, 플랫폼별 성적, 팬 투표를 한눈에 확인하세요.</p>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="compare">📊 후보 비교</button>
+    <button class="tab" data-tab="platform">📺 플랫폼 분석</button>
+    <button class="tab" data-tab="vote">🗳️ 팬 투표</button>
+    <button class="tab" data-tab="timeline">📅 시상식 일정</button>
+  </div>
+
+  <!-- 후보 비교 -->
+  <div class="section active" id="tab-compare">
+    <div class="filter-bar">
+      <label>필터:</label>
+      <select id="filterGenre">
+        <option value="all">전체 장르</option>
+        <option value="drama">드라마</option>
+        <option value="comedy">코미디</option>
+        <option value="action">액션</option>
+      </select>
+      <select id="filterPlatform">
+        <option value="all">전체 플랫폼</option>
+        <option value="streaming">스트리밍</option>
+        <option value="theater">극장</option>
+      </select>
+    </div>
+    <div class="cards" id="cardsContainer"></div>
+  </div>
+
+  <!-- 플랫폼 분석 -->
+  <div class="section" id="tab-platform">
+    <div class="compare-grid">
+      <div class="cbox stream">
+        <h3>📺 스트리밍 작품</h3>
+        <div id="streamBars"></div>
+      </div>
+      <div class="cbox theater">
+        <h3>🎬 극장 작품</h3>
+        <div id="theaterBars"></div>
+      </div>
+    </div>
+    <div style="background:#141428;border:1px solid #1e2a4a;border-radius:12px;padding:16px">
+      <h3 style="color:#a78bfa;font-size:.9rem;margin-bottom:12px">📈 수상 트렌드 (2022~2026)</h3>
+      <div id="trendChart"></div>
+    </div>
+  </div>
+
+  <!-- 팬 투표 -->
+  <div class="section" id="tab-vote">
+    <div class="vote-list" id="voteList"></div>
+    <div class="total-votes" id="totalVotes">총 투표수: 0표</div>
+  </div>
+
+  <!-- 타임라인 -->
+  <div class="section" id="tab-timeline">
+    <div class="timeline" id="timelineList"></div>
+  </div>
+
+  <footer>🤖 AI Trend App · 2026-03-02 · ActorAwards</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 데이터
+  const nominees = [
+    {name:'Zendaya',work:'Euphoria S3',award:'여우주연상 (드라마)',platform:'streaming',genre:'drama',score:92,won:true},
+    {name:'Harrison Ford',work:'The Last Stand',award:'남우주연상 (액션)',platform:'theater',genre:'action',score:88,won:false},
+    {name:'Sean Penn',work:'Redemption Road',award:'남우주연상 (드라마)',platform:'theater',genre:'drama',score:85,won:true},
+    {name:'Yasmin Finney',work:'Heartstring',award:'여우신인상',platform:'streaming',genre:'drama',score:80,won:false},
+    {name:'Tyler Reddick',work:'Speed & Glory',award:'특별공로상',platform:'theater',genre:'action',score:75,won:true},
+    {name:'Julia Hart',work:'Laugh Track',award:'여우주연상 (코미디)',platform:'streaming',genre:'comedy',score:83,won:false},
+    {name:'Marcus Cole',work:'Neon Nights',award:'남우조연상',platform:'streaming',genre:'drama',score:78,won:false},
+    {name:'Priya Nair',work:'Monsoon',award:'여우조연상',platform:'theater',genre:'drama',score:87,won:true},
+  ];
+
+  const streamData = [
+    {label:'노미네이션 수',val:62,max:100},
+    {label:'수상 수',val:34,max:100},
+    {label:'수상률',val:55,max:100},
+    {label:'평균 시청자수(M)',val:78,max:100},
+  ];
+  const theaterData = [
+    {label:'노미네이션 수',val:48,max:100},
+    {label:'수상 수',val:26,max:100},
+    {label:'수상률',val:54,max:100},
+    {label:'평균 관객수(M)',val:42,max:100},
+  ];
+
+  const trendYears = [
+    {year:'2022',stream:35,theater:65},
+    {year:'2023',stream:42,theater:58},
+    {year:'2024',stream:50,theater:50},
+    {year:'2025',stream:58,theater:42},
+    {year:'2026',stream:65,theater:35},
+  ];
+
+  const voteItems = [
+    {name:'Zendaya',sub:'Euphoria S3 · 여우주연상',votes:0},
+    {name:'Sean Penn',sub:'Redemption Road · 남우주연상',votes:0},
+    {name:'Yasmin Finney',sub:'Heartstring · 여우신인상',votes:0},
+    {name:'Harrison Ford',sub:'The Last Stand · 남우주연상',votes:0},
+    {name:'Priya Nair',sub:'Monsoon · 여우조연상',votes:0},
+  ];
+
+  const timelineData = [
+    {date:'2026-01-05',title:'골든글로브 시상식',desc:'스트리밍 드라마 부문 첫 석권, Zendaya 여우주연상 수상으로 화제'},
+    {date:'2026-01-25',title:'SAG Awards 발표',desc:'배우조합상에서 스트리밍 작품이 극장 영화를 처음으로 앞질러'},
+    {date:'2026-02-08',title:'BAFTA 시상식',desc:'Sean Penn이 영국 아카데미에서 남우주연상, 국제 작품 다양성 부각'},
+    {date:'2026-02-22',title:'배우 시상식 (ActorAwards)',desc:'전통 시상식의 스트리밍 개방 첫 해, 역대 최다 노미네이션 기록'},
+    {date:'2026-03-02',title:'결과 발표 & 화제 집중',desc:'시상 결과 SNS 폭발적 반응, 글로벌 트렌딩 1위 기록'},
+    {date:'2026-03-15',title:'아카데미 시상식 (예정)',desc:'최종 시상식으로 모든 관심이 집중, 스트리밍 vs 극장 최후 대결'},
+  ];
+
+  // 탭 전환
+  const tabs = document.querySelectorAll('.tab');
+  const sections = document.querySelectorAll('.section');
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      const target = tab.getAttribute('data-tab');
+      tabs.forEach(function(t){ t.classList.remove('active'); });
+      sections.forEach(function(s){ s.classList.remove('active'); });
+      tab.classList.add('active');
+      const sec = document.getElementById('tab-' + target);
+      if(sec) sec.classList.add('active');
+    });
+  });
+
+  // 카드 렌더
+  function renderCards(list) {
+    const container = document.getElementById('cardsContainer');
+    if(!container) return;
+    container.innerHTML = '';
+    if(list.length === 0) {
+      container.innerHTML = '<p style="color:#475569;font-size:.85rem">해당 조건의 후보가 없습니다.</p>';
+      return;
+    }
+    list.forEach(function(n) {
+      const div = document.createElement('div');
+      div.className = 'card';
+      div.innerHTML = '<div class="award-name">' + n.award + '</div>'
+        + '<div class="nominee">' + n.name + '</div>'
+        + '<div class="work">📽 ' + n.work + '</div>'
+        + '<span class="platform ' + n.platform + '">' + (n.platform==='streaming'?'📺 스트리밍':'🎬 극장') + '</span>'
+        + '<div class="won ' + (n.won?'yes':'no') + '"><span class="trophy">' + (n.won?'🏆':'🎗') + '</span>'
+        + (n.won?'수상':'후보') + '</div>'
+        + '<div class="stat-bar"><div class="stat-fill" style="width:0%" data-w="' + n.score + '%"></div></div>';
+      container.appendChild(div);
+    });
+    setTimeout(function() {
+      container.querySelectorAll('.stat-fill').forEach(function(el) {
+        el.style.width = el.getAttribute('data-w');
+      });
+    }, 100);
+  }
+  renderCards(nominees);
+
+  // 필터
+  function applyFilter() {
+    const g = document.getElementById('filterGenre');
+    const p = document.getElementById('filterPlatform');
+    if(!g||!p) return;
+    const gv = g.value, pv = p.value;
+    const filtered = nominees.filter(function(n) {
+      return (gv==='all'||n.genre===gv) && (pv==='all'||n.platform===pv);
+    });
+    renderCards(filtered);
+  }
+  const fg = document.getElementById('filterGenre');
+  const fp = document.getElementById('filterPlatform');
+  if(fg) fg.addEventListener('change', applyFilter);
+  if(fp) fp.addEventListener('change', applyFilter);
+
+  // 플랫폼 바
+  function renderBars(containerId, data, cls) {
+    const el = document.getElementById(containerId);
+    if(!el) return;
+    el.innerHTML = '';
+    data.forEach(function(d) {
+      const row = document.createElement('div');
+      row.className = 'bar-row';
+      row.innerHTML = '<div class="bar-label"><span>' + d.label + '</span><span>' + d.val + '</span></div>'
+        + '<div class="bar-track"><div class="bar-fill ' + cls + '" style="width:0%" data-w="' + d.val + '%"></div></div>';
+      el.appendChild(row);
+    });
+    setTimeout(function() {
+      el.querySelectorAll('.bar-fill').forEach(function(b) {
+        b.style.width = b.getAttribute('data-w');
+      });
+    }, 200);
+  }
+  renderBars('streamBars', streamData, 'stream-fill');
+  renderBars('theaterBars', theaterData, 'theater-fill');
+
+  // 트렌드 차트
+  const tc = document.getElementById('trendChart');
+  if(tc) {
+    let html = '';
+    trendYears.forEach(function(y) {
+      html += '<div style="margin-bottom:10px">'
+        + '<div style="display:flex;justify-content:space-between;font-size:.75rem;color:#94a3b8;margin-bottom:3px"><span>' + y.year + '</span><span>스트리밍 ' + y.stream + '% / 극장 ' + y.theater + '%</span></div>'
+        + '<div style="display:flex;height:10px;border-radius:5px;overflow:hidden">'
+        + '<div style="width:' + y.stream + '%;background:linear-gradient(90deg,#0ea5e9,#38bdf8);transition:width .8s"></div>'
+        + '<div style="width:' + y.theater + '%;background:linear-gradient(90deg,#7c3aed,#a78bfa)"></div>'
+        + '</div></div>';
+    });
+    html += '<div style="display:flex;gap:16px;margin-top:8px;font-size:.72rem">'
+      + '<span style="color:#38bdf8">■ 스트리밍</span><span style="color:#a78bfa">■ 극장</span></div>';
+    tc.innerHTML = html;
+  }
+
+  // 팬 투표
+  let voted = false;
+  let totalVotes = 0;
+  function renderVote() {
+    const vl = document.getElementById('voteList');
+    const tv = document.getElementById('totalVotes');
+    if(!vl) return;
+    vl.innerHTML = '';
+    voteItems.forEach(function(item, idx) {
+      const total = voteItems.reduce(function(a,b){return a+b.votes;},0);
+      const pct = total > 0 ? Math.round(item.votes/total*100) : 0;
+      const div = document.createElement('div');
+      div.className = 'vote-item';
+      div.innerHTML = '<div class="info"><div class="name">' + item.name + '</div><div class="sub">' + item.sub + '</div>'
+        + '<div class="vote-bar-wrap"><div class="vote-pct">' + pct + '%</div>'
+        + '<div class="vote-track"><div class="vote-fill" style="width:' + pct + '%"></div></div></div></div>'
+        + '<button class="vote-btn" data-idx="' + idx + '"' + (voted?' disabled':'') + '>투표</button>';
+      vl.appendChild(div);
+    });
+    if(tv) tv.textContent = '총 투표수: ' + totalVotes + '표';
+    vl.querySelectorAll('.vote-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        if(voted) return;
+        const i = parseInt(btn.getAttribute('data-idx'));
+        voteItems[i].votes++;
+        totalVotes++;
+        voted = true;
+        renderVote();
+      });
+    });
+  }
+  renderVote();
+
+  // 타임라인
+  const tll = document.getElementById('timelineList');
+  if(tll) {
+    timelineData.forEach(function(t) {
+      const div = document.createElement('div');
+      div.className = 'tl-item';
+      div.innerHTML = '<div class="tl-dot"></div>'
+        + '<div class="tl-date">' + t.date + '</div>'
+        + '<div class="tl-title">' + t.title + '</div>'
+        + '<div class="tl-desc">' + t.desc + '</div>';
+      tll.appendChild(div);
+    });
+  }
+});
+</script>
+</body>
+</html>
